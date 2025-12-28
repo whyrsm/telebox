@@ -1,0 +1,115 @@
+import { create } from 'zustand';
+
+export interface FileItem {
+  id: string;
+  name: string;
+  size: string;
+  mimeType: string;
+  messageId: string;
+  folderId: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface FolderItem {
+  id: string;
+  name: string;
+  parentId: string | null;
+  createdAt: string;
+  updatedAt: string;
+  children?: FolderItem[];
+}
+
+type ViewMode = 'grid' | 'list';
+
+interface DriveState {
+  currentFolderId: string | null;
+  folderPath: FolderItem[];
+  files: FileItem[];
+  folders: FolderItem[];
+  folderTree: FolderItem[];
+  selectedItems: Set<string>;
+  viewMode: ViewMode;
+  searchQuery: string;
+  isLoading: boolean;
+
+  setCurrentFolder: (folderId: string | null, path?: FolderItem[]) => void;
+  setFiles: (files: FileItem[]) => void;
+  setFolders: (folders: FolderItem[]) => void;
+  setFolderTree: (tree: FolderItem[]) => void;
+  setViewMode: (mode: ViewMode) => void;
+  setSearchQuery: (query: string) => void;
+  setLoading: (loading: boolean) => void;
+  toggleSelect: (id: string) => void;
+  selectAll: () => void;
+  clearSelection: () => void;
+  addToPath: (folder: FolderItem) => void;
+  navigateToPathIndex: (index: number) => void;
+}
+
+export const useDriveStore = create<DriveState>((set, get) => ({
+  currentFolderId: null,
+  folderPath: [],
+  files: [],
+  folders: [],
+  folderTree: [],
+  selectedItems: new Set(),
+  viewMode: 'grid',
+  searchQuery: '',
+  isLoading: false,
+
+  setCurrentFolder: (folderId, path) => {
+    set({
+      currentFolderId: folderId,
+      folderPath: path || [],
+      selectedItems: new Set(),
+    });
+  },
+
+  setFiles: (files) => set({ files }),
+  setFolders: (folders) => set({ folders }),
+  setFolderTree: (tree) => set({ folderTree: tree }),
+  setViewMode: (mode) => set({ viewMode: mode }),
+  setSearchQuery: (query) => set({ searchQuery: query }),
+  setLoading: (loading) => set({ isLoading: loading }),
+
+  toggleSelect: (id) => {
+    const selected = new Set(get().selectedItems);
+    if (selected.has(id)) {
+      selected.delete(id);
+    } else {
+      selected.add(id);
+    }
+    set({ selectedItems: selected });
+  },
+
+  selectAll: () => {
+    const { files, folders } = get();
+    const allIds = [...files.map((f) => f.id), ...folders.map((f) => f.id)];
+    set({ selectedItems: new Set(allIds) });
+  },
+
+  clearSelection: () => set({ selectedItems: new Set() }),
+
+  addToPath: (folder) => {
+    set((state) => ({
+      folderPath: [...state.folderPath, folder],
+      currentFolderId: folder.id,
+      selectedItems: new Set(),
+    }));
+  },
+
+  navigateToPathIndex: (index) => {
+    set((state) => {
+      if (index < 0) {
+        return { folderPath: [], currentFolderId: null, selectedItems: new Set() };
+      }
+      const newPath = state.folderPath.slice(0, index + 1);
+      return {
+        folderPath: newPath,
+        currentFolderId: newPath[newPath.length - 1]?.id || null,
+        selectedItems: new Set(),
+      };
+    });
+  },
+}));
