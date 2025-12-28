@@ -63,10 +63,12 @@ export function useMoveFile() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, folderId }: { id: string; folderId?: string | null }) =>
+    mutationFn: ({ id, folderId }: { id: string; folderId?: string | null; sourceFolderId?: string | null }) =>
       filesApi.move(id, folderId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.files.all });
+    onSuccess: (_, { folderId, sourceFolderId }) => {
+      // Invalidate both source and destination folders
+      queryClient.invalidateQueries({ queryKey: queryKeys.files.list(sourceFolderId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.files.list(folderId) });
     },
   });
 }
@@ -75,10 +77,11 @@ export function useRenameFile() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, name }: { id: string; name: string }) =>
+    mutationFn: ({ id, name }: { id: string; name: string; folderId?: string | null }) =>
       filesApi.rename(id, name),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.files.all });
+    onSuccess: (_, { folderId }) => {
+      // Only invalidate the specific folder's file list
+      queryClient.invalidateQueries({ queryKey: queryKeys.files.list(folderId) });
     },
   });
 }
@@ -87,9 +90,10 @@ export function useDeleteFile() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (id: string) => filesApi.delete(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.files.all });
+    mutationFn: ({ id }: { id: string; folderId?: string | null }) => filesApi.delete(id),
+    onSuccess: (_, { folderId }) => {
+      // Only invalidate the specific folder's file list
+      queryClient.invalidateQueries({ queryKey: queryKeys.files.list(folderId) });
     },
   });
 }

@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { Folder, Loader2 } from 'lucide-react';
 import { cn, formatFileSize, formatDate, getFileIcon } from '@/lib/utils';
 import { useDriveStore, FileItem, FolderItem } from '@/stores/drive.store';
@@ -13,7 +14,7 @@ interface FileListProps {
   onContextMenu: (e: React.MouseEvent, item: FileItem | FolderItem, type: 'file' | 'folder') => void;
 }
 
-export function FileList({
+export const FileList = memo(function FileList({
   files,
   folders,
   isLoading,
@@ -103,4 +104,4 @@ export function FileList({
       )}
     </div>
   );
-}
+});

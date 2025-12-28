@@ -42,10 +42,12 @@ export function useUpdateFolder() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, name }: { id: string; name: string }) =>
+    mutationFn: ({ id, name }: { id: string; name: string; parentId?: string | null }) =>
       foldersApi.update(id, name),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.folders.all });
+    onSuccess: (_, { parentId }) => {
+      // Only invalidate the specific parent folder's list and tree
+      queryClient.invalidateQueries({ queryKey: queryKeys.folders.list(parentId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.folders.tree() });
     },
   });
 }
@@ -54,10 +56,13 @@ export function useMoveFolder() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, parentId }: { id: string; parentId?: string | null }) =>
+    mutationFn: ({ id, parentId }: { id: string; parentId?: string | null; sourceParentId?: string | null }) =>
       foldersApi.move(id, parentId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.folders.all });
+    onSuccess: (_, { parentId, sourceParentId }) => {
+      // Invalidate both source and destination parent folders
+      queryClient.invalidateQueries({ queryKey: queryKeys.folders.list(sourceParentId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.folders.list(parentId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.folders.tree() });
     },
   });
 }
@@ -66,9 +71,11 @@ export function useDeleteFolder() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (id: string) => foldersApi.delete(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.folders.all });
+    mutationFn: ({ id }: { id: string; parentId?: string | null }) => foldersApi.delete(id),
+    onSuccess: (_, { parentId }) => {
+      // Only invalidate the specific parent folder's list and tree
+      queryClient.invalidateQueries({ queryKey: queryKeys.folders.list(parentId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.folders.tree() });
     },
   });
 }

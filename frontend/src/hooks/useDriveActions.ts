@@ -48,18 +48,18 @@ export function useDriveActions(currentFolderId: string | null) {
   const handleRename = (name: string) => {
     if (!renameItem) return;
     if (renameItem.type === 'folder') {
-      updateFolder.mutate({ id: renameItem.id, name });
+      updateFolder.mutate({ id: renameItem.id, name, parentId: currentFolderId });
     } else {
-      renameFile.mutate({ id: renameItem.id, name });
+      renameFile.mutate({ id: renameItem.id, name, folderId: currentFolderId });
     }
   };
 
   const handleDelete = () => {
     if (!contextMenu) return;
     if (contextMenu.type === 'folder') {
-      deleteFolder.mutate(contextMenu.item.id);
+      deleteFolder.mutate({ id: contextMenu.item.id, parentId: currentFolderId });
     } else {
-      deleteFile.mutate(contextMenu.item.id);
+      deleteFile.mutate({ id: contextMenu.item.id, folderId: currentFolderId });
     }
     setContextMenu(null);
   };

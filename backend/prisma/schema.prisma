@@ -37,6 +37,9 @@ model Folder {
   files File[]
 
   @@index([userId, parentId])
+  @@index([userId])
+  @@index([parentId])
+  @@index([createdAt])
   @@map("folders")
 }
 
@@ -55,6 +58,10 @@ model File {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   @@index([userId, folderId])
+  @@index([userId])
+  @@index([folderId])
   @@index([messageId])
+  @@index([createdAt])
+  @@index([name])
   @@map("files")
 }

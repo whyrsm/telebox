@@ -13,8 +13,9 @@ import { UploadProgress } from '@/components/upload/UploadProgress';
 import { useDriveStore, FolderItem, FileItem } from '@/stores/drive.store';
 import { useFolders, useFiles, useFileSearch } from '@/lib/queries';
 import { useDriveActions } from '@/hooks/useDriveActions';
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
+import { useDebouncedCallback } from 'use-debounce';
 
 export function DrivePage() {
   const { currentFolderId, viewMode, searchQuery, setSearchQuery, addToPath } = useDriveStore();
@@ -53,13 +54,19 @@ export function DrivePage() {
   const displayFiles = searchQuery ? searchResults : files;
   const displayFolders = searchQuery ? [] : folders;
 
-  const handleFolderOpen = (folder: FolderItem) => {
+  const handleFolderOpen = useCallback((folder: FolderItem) => {
     addToPath(folder);
-  };
+  }, [addToPath]);
 
-  const handleSearch = (query: string) => {
-    setSearchQuery(query);
-  };
+  // Debounce search to reduce API calls
+  const debouncedSetSearchQuery = useDebouncedCallback(
+    (query: string) => setSearchQuery(query),
+    300
+  );
+
+  const handleSearch = useCallback((query: string) => {
+    debouncedSetSearchQuery(query);
+  }, [debouncedSetSearchQuery]);
 
   const handleImportComplete = () => {
     // Refresh folders and files after import

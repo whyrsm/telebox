@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { Folder, Loader2 } from 'lucide-react';
 import { cn, formatFileSize, getFileIcon } from '@/lib/utils';
 import { useDriveStore, FileItem, FolderItem } from '@/stores/drive.store';
@@ -13,7 +14,7 @@ interface FileGridProps {
   onContextMenu: (e: React.MouseEvent, item: FileItem | FolderItem, type: 'file' | 'folder') => void;
 }
 
-export function FileGrid({
+export const FileGrid = memo(function FileGrid({
   files,
   folders,
   isLoading,
@@ -86,4 +87,4 @@ export function FileGrid({
       )}
     </div>
   );
-}
+});
