@@ -80,11 +80,12 @@ export function DrivePage() {
 
   return (
     <div className="h-screen flex flex-col">
-      <Header onUpload={() => setShowUpload(true)} onSearch={handleSearch} />
+      <Header onSearch={handleSearch} />
 
       <div className="flex-1 flex overflow-hidden">
         <Sidebar 
-          onNewFolder={() => setShowNewFolder(true)} 
+          onNewFolder={() => setShowNewFolder(true)}
+          onUpload={() => setShowUpload(true)}
           onImport={() => setShowImport(true)}
         />
 

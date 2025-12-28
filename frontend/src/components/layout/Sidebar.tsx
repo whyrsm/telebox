@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { ChevronRight, ChevronDown, Folder, Plus, HardDrive, Loader2, Download } from 'lucide-react';
+import { ChevronRight, ChevronDown, Folder, HardDrive, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useDriveStore, FolderItem } from '@/stores/drive.store';
 import { useFolderTree } from '@/lib/queries';
+import { NewMenu } from './NewMenu';
 
 interface FolderTreeItemProps {
   folder: FolderItem;
@@ -63,10 +64,11 @@ function FolderTreeItem({ folder, level, onSelect, path }: FolderTreeItemProps) 
 
 interface SidebarProps {
   onNewFolder: () => void;
+  onUpload: () => void;
   onImport: () => void;
 }
 
-export function Sidebar({ onNewFolder, onImport }: SidebarProps) {
+export function Sidebar({ onNewFolder, onUpload, onImport }: SidebarProps) {
   const { setCurrentFolder, currentFolderId } = useDriveStore();
   const { data: folderTree = [], isLoading } = useFolderTree();
 
@@ -80,32 +82,12 @@ export function Sidebar({ onNewFolder, onImport }: SidebarProps) {
 
   return (
     <aside className="w-56 bg-[var(--bg-sidebar)] border-r border-[var(--border-color)] flex flex-col h-full">
-      <div className="p-3 space-y-2">
-        <button
-          onClick={onNewFolder}
-          className={cn(
-            'flex items-center gap-2 w-full px-3 py-2 rounded-md',
-            'bg-white border border-[var(--border-color)]',
-            'hover:bg-[var(--hover-bg)] transition-colors',
-            'text-sm font-medium'
-          )}
-        >
-          <Plus size={18} />
-          New Folder
-        </button>
-        
-        <button
-          onClick={onImport}
-          className={cn(
-            'flex items-center gap-2 w-full px-3 py-2 rounded-md',
-            'bg-white border border-[var(--border-color)]',
-            'hover:bg-[var(--hover-bg)] transition-colors',
-            'text-sm font-medium'
-          )}
-        >
-          <Download size={18} />
-          Import from Telegram
-        </button>
+      <div className="p-3">
+        <NewMenu 
+          onNewFolder={onNewFolder}
+          onUpload={onUpload}
+          onImport={onImport}
+        />
       </div>
 
       <nav className="flex-1 overflow-y-auto px-2">

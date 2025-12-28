@@ -1,15 +1,14 @@
 import { useState } from 'react';
-import { Search, Grid, List, Upload, LogOut, User } from 'lucide-react';
+import { Search, Grid, List, LogOut, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useDriveStore } from '@/stores/drive.store';
 import { useAuthStore } from '@/stores/auth.store';
 
 interface HeaderProps {
-  onUpload: () => void;
   onSearch: (query: string) => void;
 }
 
-export function Header({ onUpload, onSearch }: HeaderProps) {
+export function Header({ onSearch }: HeaderProps) {
   const { viewMode, setViewMode, searchQuery, setSearchQuery } = useDriveStore();
   const { user, logout } = useAuthStore();
   const [showUserMenu, setShowUserMenu] = useState(false);
@@ -50,19 +49,6 @@ export function Header({ onUpload, onSearch }: HeaderProps) {
       </form>
 
       <div className="flex items-center gap-2">
-        <button
-          onClick={onUpload}
-          className={cn(
-            'flex items-center gap-2 px-3 py-1.5 rounded-md',
-            'bg-[var(--accent)] text-white',
-            'hover:opacity-90 transition-opacity',
-            'text-sm font-medium'
-          )}
-        >
-          <Upload size={16} />
-          Upload
-        </button>
-
         <div className="flex border border-[var(--border-color)] rounded-md overflow-hidden">
           <button
             onClick={() => setViewMode('grid')}
