@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState } from 'react';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { Header } from '@/components/layout/Header';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
@@ -9,7 +9,18 @@ import { UploadModal } from '@/components/modals/UploadModal';
 import { NewFolderModal } from '@/components/modals/NewFolderModal';
 import { RenameModal } from '@/components/modals/RenameModal';
 import { useDriveStore, FileItem, FolderItem } from '@/stores/drive.store';
-import { foldersApi, filesApi } from '@/lib/api';
+import {
+  useFolders,
+  useCreateFolder,
+  useUpdateFolder,
+  useDeleteFolder,
+  useFiles,
+  useFileSearch,
+  useUploadFile,
+  useDownloadFile,
+  useRenameFile,
+  useDeleteFile,
+} from '@/lib/queries';
 
 interface ContextMenuState {
   x: number;
@@ -19,15 +30,7 @@ interface ContextMenuState {
 }
 
 export function DrivePage() {
-  const {
-    currentFolderId,
-    viewMode,
-    setFiles,
-    setFolders,
-    setFolderTree,
-    setLoading,
-    addToPath,
-  } = useDriveStore();
+  const { currentFolderId, viewMode, searchQuery, setSearchQuery, addToPath } = useDriveStore();
 
   const [showUpload, setShowUpload] = useState(false);
   const [showNewFolder, setShowNewFolder] = useState(false);
@@ -35,55 +38,30 @@ export function DrivePage() {
   const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null);
   const [renameItem, setRenameItem] = useState<{ id: string; name: string; type: 'file' | 'folder' } | null>(null);
 
-  const loadContent = useCallback(async () => {
-    setLoading(true);
-    try {
-      const [foldersRes, filesRes] = await Promise.all([
-        foldersApi.list(currentFolderId),
-        filesApi.list(currentFolderId),
-      ]);
-      setFolders(foldersRes.data);
-      setFiles(filesRes.data);
-    } catch (error) {
-      console.error('Failed to load content:', error);
-    } finally {
-      setLoading(false);
-    }
-  }, [currentFolderId, setFiles, setFolders, setLoading]);
+  // Queries
+  const { data: folders = [], isLoading: foldersLoading } = useFolders(currentFolderId);
+  const { data: files = [], isLoading: filesLoading } = useFiles(currentFolderId);
+  const { data: searchResults = [] } = useFileSearch(searchQuery);
 
-  const loadFolderTree = useCallback(async () => {
-    try {
-      const { data } = await foldersApi.tree();
-      setFolderTree(data);
-    } catch (error) {
-      console.error('Failed to load folder tree:', error);
-    }
-  }, [setFolderTree]);
+  // Mutations
+  const uploadFile = useUploadFile();
+  const downloadFile = useDownloadFile();
+  const createFolder = useCreateFolder();
+  const updateFolder = useUpdateFolder();
+  const deleteFolder = useDeleteFolder();
+  const renameFile = useRenameFile();
+  const deleteFile = useDeleteFile();
 
-  useEffect(() => {
-    loadContent();
-  }, [loadContent]);
-
-  useEffect(() => {
-    loadFolderTree();
-  }, [loadFolderTree]);
+  const isLoading = foldersLoading || filesLoading;
+  const displayFiles = searchQuery ? searchResults : files;
+  const displayFolders = searchQuery ? [] : folders;
 
   const handleFolderOpen = (folder: FolderItem) => {
     addToPath(folder);
   };
 
-  const handleFileOpen = async (file: FileItem) => {
-    try {
-      const response = await filesApi.download(file.id);
-      const url = window.URL.createObjectURL(response.data);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = file.name;
-      a.click();
-      window.URL.revokeObjectURL(url);
-    } catch (error) {
-      console.error('Failed to download file:', error);
-    }
+  const handleFileOpen = (file: FileItem) => {
+    downloadFile.mutate(file);
   };
 
   const handleContextMenu = (
@@ -95,69 +73,43 @@ export function DrivePage() {
     setContextMenu({ x: e.clientX, y: e.clientY, item, type });
   };
 
-  const handleUpload = async (files: File[]) => {
-    for (const file of files) {
-      try {
-        await filesApi.upload(file, currentFolderId || undefined);
-      } catch (error) {
-        console.error('Failed to upload file:', error);
-      }
-    }
-    loadContent();
-  };
-
-  const handleCreateFolder = async (name: string) => {
-    try {
-      await foldersApi.create(name, currentFolderId || undefined);
-      loadContent();
-      loadFolderTree();
-    } catch (error) {
-      console.error('Failed to create folder:', error);
+  const handleUpload = async (filesToUpload: File[]) => {
+    for (const file of filesToUpload) {
+      await uploadFile.mutateAsync({
+        file,
+        folderId: currentFolderId || undefined,
+      });
     }
   };
 
-  const handleRename = async (name: string) => {
+  const handleCreateFolder = (name: string) => {
+    createFolder.mutate({
+      name,
+      parentId: currentFolderId || undefined,
+    });
+  };
+
+  const handleRename = (name: string) => {
     if (!renameItem) return;
-    try {
-      if (renameItem.type === 'folder') {
-        await foldersApi.update(renameItem.id, name);
-        loadFolderTree();
-      } else {
-        await filesApi.rename(renameItem.id, name);
-      }
-      loadContent();
-    } catch (error) {
-      console.error('Failed to rename:', error);
+    if (renameItem.type === 'folder') {
+      updateFolder.mutate({ id: renameItem.id, name });
+    } else {
+      renameFile.mutate({ id: renameItem.id, name });
     }
   };
 
-  const handleDelete = async () => {
+  const handleDelete = () => {
     if (!contextMenu) return;
-    try {
-      if (contextMenu.type === 'folder') {
-        await foldersApi.delete(contextMenu.item.id);
-        loadFolderTree();
-      } else {
-        await filesApi.delete(contextMenu.item.id);
-      }
-      loadContent();
-    } catch (error) {
-      console.error('Failed to delete:', error);
+    if (contextMenu.type === 'folder') {
+      deleteFolder.mutate(contextMenu.item.id);
+    } else {
+      deleteFile.mutate(contextMenu.item.id);
     }
+    setContextMenu(null);
   };
 
-  const handleSearch = async (query: string) => {
-    if (!query.trim()) {
-      loadContent();
-      return;
-    }
-    try {
-      const { data } = await filesApi.search(query);
-      setFiles(data);
-      setFolders([]);
-    } catch (error) {
-      console.error('Failed to search:', error);
-    }
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
   };
 
   return (
@@ -173,12 +125,18 @@ export function DrivePage() {
           <div className="flex-1 overflow-auto">
             {viewMode === 'grid' ? (
               <FileGrid
+                files={displayFiles}
+                folders={displayFolders}
+                isLoading={isLoading}
                 onFolderOpen={handleFolderOpen}
                 onFileOpen={handleFileOpen}
                 onContextMenu={handleContextMenu}
               />
             ) : (
               <FileList
+                files={displayFiles}
+                folders={displayFolders}
+                isLoading={isLoading}
                 onFolderOpen={handleFolderOpen}
                 onFileOpen={handleFileOpen}
                 onContextMenu={handleContextMenu}
@@ -206,6 +164,7 @@ export function DrivePage() {
               type: contextMenu.type,
             });
             setShowRename(true);
+            setContextMenu(null);
           }}
           onMove={() => {
             // TODO: Implement move modal

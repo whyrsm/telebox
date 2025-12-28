@@ -7,6 +7,7 @@ import {
   FileText,
   Archive,
   FileSpreadsheet,
+  Loader2,
 } from 'lucide-react';
 import { cn, formatFileSize, getFileIcon } from '@/lib/utils';
 import { useDriveStore, FileItem, FolderItem } from '@/stores/drive.store';
@@ -23,13 +24,23 @@ const iconMap: Record<string, React.ElementType> = {
 };
 
 interface FileGridProps {
+  files: FileItem[];
+  folders: FolderItem[];
+  isLoading?: boolean;
   onFolderOpen: (folder: FolderItem) => void;
   onFileOpen: (file: FileItem) => void;
   onContextMenu: (e: React.MouseEvent, item: FileItem | FolderItem, type: 'file' | 'folder') => void;
 }
 
-export function FileGrid({ onFolderOpen, onFileOpen, onContextMenu }: FileGridProps) {
-  const { files, folders, selectedItems, toggleSelect } = useDriveStore();
+export function FileGrid({
+  files,
+  folders,
+  isLoading,
+  onFolderOpen,
+  onFileOpen,
+  onContextMenu,
+}: FileGridProps) {
+  const { selectedItems, toggleSelect } = useDriveStore();
 
   const handleClick = (e: React.MouseEvent, id: string) => {
     if (e.ctrlKey || e.metaKey) {
@@ -44,6 +55,14 @@ export function FileGrid({ onFolderOpen, onFileOpen, onContextMenu }: FileGridPr
       onFileOpen(item as FileItem);
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-16">
+        <Loader2 className="w-8 h-8 animate-spin text-[var(--accent)]" />
+      </div>
+    );
+  }
 
   return (
     <div className="grid grid-cols-[repeat(auto-fill,minmax(120px,1fr))] gap-2 p-4">

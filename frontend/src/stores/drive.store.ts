@@ -23,25 +23,21 @@ export interface FolderItem {
 type ViewMode = 'grid' | 'list';
 
 interface DriveState {
+  // Navigation
   currentFolderId: string | null;
   folderPath: FolderItem[];
-  files: FileItem[];
-  folders: FolderItem[];
-  folderTree: FolderItem[];
+
+  // UI state
   selectedItems: Set<string>;
   viewMode: ViewMode;
   searchQuery: string;
-  isLoading: boolean;
 
+  // Actions
   setCurrentFolder: (folderId: string | null, path?: FolderItem[]) => void;
-  setFiles: (files: FileItem[]) => void;
-  setFolders: (folders: FolderItem[]) => void;
-  setFolderTree: (tree: FolderItem[]) => void;
   setViewMode: (mode: ViewMode) => void;
   setSearchQuery: (query: string) => void;
-  setLoading: (loading: boolean) => void;
   toggleSelect: (id: string) => void;
-  selectAll: () => void;
+  selectAll: (ids: string[]) => void;
   clearSelection: () => void;
   addToPath: (folder: FolderItem) => void;
   navigateToPathIndex: (index: number) => void;
@@ -50,28 +46,21 @@ interface DriveState {
 export const useDriveStore = create<DriveState>((set, get) => ({
   currentFolderId: null,
   folderPath: [],
-  files: [],
-  folders: [],
-  folderTree: [],
   selectedItems: new Set(),
   viewMode: 'grid',
   searchQuery: '',
-  isLoading: false,
 
   setCurrentFolder: (folderId, path) => {
     set({
       currentFolderId: folderId,
       folderPath: path || [],
       selectedItems: new Set(),
+      searchQuery: '',
     });
   },
 
-  setFiles: (files) => set({ files }),
-  setFolders: (folders) => set({ folders }),
-  setFolderTree: (tree) => set({ folderTree: tree }),
   setViewMode: (mode) => set({ viewMode: mode }),
   setSearchQuery: (query) => set({ searchQuery: query }),
-  setLoading: (loading) => set({ isLoading: loading }),
 
   toggleSelect: (id) => {
     const selected = new Set(get().selectedItems);
@@ -83,10 +72,8 @@ export const useDriveStore = create<DriveState>((set, get) => ({
     set({ selectedItems: selected });
   },
 
-  selectAll: () => {
-    const { files, folders } = get();
-    const allIds = [...files.map((f) => f.id), ...folders.map((f) => f.id)];
-    set({ selectedItems: new Set(allIds) });
+  selectAll: (ids) => {
+    set({ selectedItems: new Set(ids) });
   },
 
   clearSelection: () => set({ selectedItems: new Set() }),
@@ -96,6 +83,7 @@ export const useDriveStore = create<DriveState>((set, get) => ({
       folderPath: [...state.folderPath, folder],
       currentFolderId: folder.id,
       selectedItems: new Set(),
+      searchQuery: '',
     }));
   },
 

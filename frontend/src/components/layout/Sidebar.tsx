@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { ChevronRight, ChevronDown, Folder, Plus, HardDrive } from 'lucide-react';
+import { ChevronRight, ChevronDown, Folder, Plus, HardDrive, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useDriveStore, FolderItem } from '@/stores/drive.store';
+import { useFolderTree } from '@/lib/queries';
 
 interface FolderTreeItemProps {
   folder: FolderItem;
@@ -65,7 +66,8 @@ interface SidebarProps {
 }
 
 export function Sidebar({ onNewFolder }: SidebarProps) {
-  const { folderTree, setCurrentFolder, currentFolderId } = useDriveStore();
+  const { setCurrentFolder, currentFolderId } = useDriveStore();
+  const { data: folderTree = [], isLoading } = useFolderTree();
 
   const handleSelectFolder = (folder: FolderItem, path: FolderItem[]) => {
     setCurrentFolder(folder.id, path);
@@ -106,15 +108,21 @@ export function Sidebar({ onNewFolder }: SidebarProps) {
         </div>
 
         <div className="mt-1">
-          {folderTree.map((folder) => (
-            <FolderTreeItem
-              key={folder.id}
-              folder={folder}
-              level={0}
-              onSelect={handleSelectFolder}
-              path={[]}
-            />
-          ))}
+          {isLoading ? (
+            <div className="flex items-center justify-center py-4">
+              <Loader2 className="w-5 h-5 animate-spin text-[var(--text-secondary)]" />
+            </div>
+          ) : (
+            folderTree.map((folder) => (
+              <FolderTreeItem
+                key={folder.id}
+                folder={folder}
+                level={0}
+                onSelect={handleSelectFolder}
+                path={[]}
+              />
+            ))
+          )}
         </div>
       </nav>
     </aside>

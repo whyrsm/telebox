@@ -7,6 +7,7 @@ import {
   FileText,
   Archive,
   FileSpreadsheet,
+  Loader2,
 } from 'lucide-react';
 import { cn, formatFileSize, formatDate, getFileIcon } from '@/lib/utils';
 import { useDriveStore, FileItem, FolderItem } from '@/stores/drive.store';
@@ -23,13 +24,23 @@ const iconMap: Record<string, React.ElementType> = {
 };
 
 interface FileListProps {
+  files: FileItem[];
+  folders: FolderItem[];
+  isLoading?: boolean;
   onFolderOpen: (folder: FolderItem) => void;
   onFileOpen: (file: FileItem) => void;
   onContextMenu: (e: React.MouseEvent, item: FileItem | FolderItem, type: 'file' | 'folder') => void;
 }
 
-export function FileList({ onFolderOpen, onFileOpen, onContextMenu }: FileListProps) {
-  const { files, folders, selectedItems, toggleSelect } = useDriveStore();
+export function FileList({
+  files,
+  folders,
+  isLoading,
+  onFolderOpen,
+  onFileOpen,
+  onContextMenu,
+}: FileListProps) {
+  const { selectedItems, toggleSelect } = useDriveStore();
 
   const handleClick = (e: React.MouseEvent, id: string) => {
     if (e.ctrlKey || e.metaKey) {
@@ -44,6 +55,14 @@ export function FileList({ onFolderOpen, onFileOpen, onContextMenu }: FileListPr
       onFileOpen(item as FileItem);
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-16">
+        <Loader2 className="w-8 h-8 animate-spin text-[var(--accent)]" />
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col">
