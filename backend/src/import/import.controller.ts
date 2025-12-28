@@ -2,7 +2,7 @@ import { Controller, Get, Post, Body, Query, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { ImportService } from './import.service';
-import { ImportFilesDto } from './dto/import.dto';
+import { ImportFilesDto, ImportSingleFileDto } from './dto/import.dto';
 
 @Controller('import')
 @UseGuards(JwtAuthGuard)
@@ -40,5 +40,13 @@ export class ImportController {
     @Body() dto: ImportFilesDto,
   ) {
     return this.importService.importFiles(user.sub, dto);
+  }
+
+  @Post('single')
+  async importSingleFile(
+    @CurrentUser() user: { sub: string },
+    @Body() dto: ImportSingleFileDto,
+  ) {
+    return this.importService.importSingleFile(user.sub, dto);
   }
 }

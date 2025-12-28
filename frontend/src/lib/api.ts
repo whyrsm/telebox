@@ -89,4 +89,6 @@ export const importApi = {
     api.get('/import/dialogs/files', { params: { chatId, chatType, limit } }),
   importFiles: (chatId: string, chatName: string, chatType: string, messageIds: number[]) =>
     api.post('/import', { chatId, chatName, chatType, messageIds }),
+  importSingleFile: (chatId: string, chatName: string, chatType: string, messageId: number) =>
+    api.post('/import/single', { chatId, chatName, chatType, messageId }),
 };

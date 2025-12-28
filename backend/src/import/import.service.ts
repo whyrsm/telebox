@@ -3,7 +3,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { TelegramService } from '../telegram/telegram.service';
 import { AuthService } from '../auth/auth.service';
 import { Api } from 'telegram';
-import { ImportFilesDto } from './dto/import.dto';
+import { ImportFilesDto, ImportSingleFileDto } from './dto/import.dto';
 
 export interface DialogInfo {
   id: string;
@@ -195,6 +195,130 @@ export class ImportService {
       };
     } catch (error) {
       console.error('Error in importFiles:', error);
+      throw error;
+    } finally {
+      await client.disconnect();
+    }
+  }
+
+  async importSingleFile(userId: string, dto: ImportSingleFileDto) {
+    const client = await this.authService.getClientForUser(userId);
+
+    try {
+      // 1. Create or get folder with chat name
+      let folder = await this.prisma.folder.findFirst({
+        where: {
+          userId,
+          name: dto.chatName,
+          parentId: null,
+        },
+      });
+
+      if (!folder) {
+        folder = await this.prisma.folder.create({
+          data: {
+            name: dto.chatName,
+            userId,
+          },
+        });
+      }
+
+      // 2. Get the entity for the source chat
+      let targetEntity: any;
+      
+      if (dto.chatType === 'saved' || dto.chatId === 'me') {
+        targetEntity = new Api.InputPeerSelf();
+      } else {
+        const dialogs = await client.getDialogs({ limit: 100 });
+        
+        let foundEntity: any = null;
+        for (const dialog of dialogs) {
+          const entity = (dialog as any).entity;
+          if (entity && entity.id && entity.id.toString() === dto.chatId) {
+            foundEntity = entity;
+            break;
+          }
+        }
+        
+        if (!foundEntity) {
+          throw new Error(`Chat not found: ${dto.chatId}`);
+        }
+        targetEntity = foundEntity;
+      }
+
+      // 3. Get the original message
+      const originalMessages = await client.getMessages(targetEntity, { ids: [dto.messageId] });
+      if (!originalMessages.length || !originalMessages[0].media) {
+        throw new Error('Message or media not found');
+      }
+
+      const msg = originalMessages[0];
+      const media = msg.media!;
+
+      // 4. Download the media
+      const buffer = await client.downloadMedia(media);
+      if (!buffer) {
+        throw new Error('Failed to download media');
+      }
+
+      // 5. Extract file info
+      let fileName = 'file';
+      if (media instanceof Api.MessageMediaDocument) {
+        const doc = media.document;
+        if (doc instanceof Api.Document) {
+          for (const attr of doc.attributes) {
+            if (attr instanceof Api.DocumentAttributeFilename) {
+              fileName = attr.fileName;
+              break;
+            }
+          }
+        }
+      } else if (media instanceof Api.MessageMediaPhoto) {
+        fileName = `photo_${msg.id}.jpg`;
+      }
+
+      // 6. Re-upload to Saved Messages
+      const result = await client.sendFile('me', {
+        file: buffer as Buffer,
+        caption: fileName,
+        forceDocument: true,
+        attributes: [
+          new Api.DocumentAttributeFilename({ fileName }),
+        ],
+      });
+
+      // 7. Extract file info from uploaded message
+      const fileInfo = this.extractFileInfo(result);
+      if (!fileInfo) {
+        throw new Error('Failed to extract file info from uploaded message');
+      }
+
+      // 8. Create file record in database
+      const file = await this.prisma.file.create({
+        data: {
+          name: fileInfo.name,
+          size: BigInt(fileInfo.size),
+          mimeType: fileInfo.mimeType,
+          messageId: BigInt(result.id),
+          folderId: folder.id,
+          userId,
+        },
+      });
+
+      return {
+        success: true,
+        folder: {
+          id: folder.id,
+          name: folder.name,
+        },
+        file: {
+          ...file,
+          size: file.size.toString(),
+          messageId: file.messageId.toString(),
+        },
+      };
+    } catch (error) {
+      console.error('Error in importSingleFile:', error);
       throw error;
     } finally {
       await client.disconnect();
