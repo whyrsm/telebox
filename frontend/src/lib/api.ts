@@ -55,6 +55,7 @@ export const foldersApi = {
   create: (name: string, parentId?: string) => api.post('/folders', { name, parentId }),
   update: (id: string, name: string) => api.patch(`/folders/${id}`, { name }),
   move: (id: string, parentId?: string | null) => api.patch(`/folders/${id}/move`, { parentId }),
+  batchMove: (folderIds: string[], parentId?: string | null) => api.patch('/folders/batch/move', { folderIds, parentId }),
   delete: (id: string) => api.delete(`/folders/${id}`),
 };
 
@@ -78,6 +79,7 @@ export const filesApi = {
   },
   download: (id: string) => api.get(`/files/${id}/download`, { responseType: 'blob' }),
   move: (id: string, folderId?: string | null) => api.patch(`/files/${id}/move`, { folderId }),
+  batchMove: (fileIds: string[], folderId?: string | null) => api.patch('/files/batch/move', { fileIds, folderId }),
   rename: (id: string, name: string) => api.patch(`/files/${id}/rename`, { name }),
   delete: (id: string) => api.delete(`/files/${id}`),
 };

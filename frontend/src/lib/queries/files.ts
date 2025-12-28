@@ -73,6 +73,19 @@ export function useMoveFile() {
   });
 }
 
+export function useBatchMoveFiles() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ fileIds, folderId }: { fileIds: string[]; folderId?: string | null; sourceFolderId?: string | null }) =>
+      filesApi.batchMove(fileIds, folderId),
+    onSuccess: (_, { folderId, sourceFolderId }) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.files.list(sourceFolderId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.files.list(folderId) });
+    },
+  });
+}
+
 export function useRenameFile() {
   const queryClient = useQueryClient();
 

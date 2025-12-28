@@ -29,6 +29,7 @@ export const FileList = memo(function FileList({
   const { selectedItems } = useDriveStore();
   const { handleClick, handleDoubleClick } = useFileItemHandlers(onFolderOpen, onFileOpen);
   const {
+    dragCount,
     dropTargetId,
     successFlashId,
     lastMoveResult,
@@ -77,7 +78,7 @@ export const FileList = memo(function FileList({
           onClick={(e) => handleClick(e, folder, 'folder')}
           onDoubleClick={() => handleDoubleClick(folder, 'folder')}
           onContextMenu={(e) => onContextMenu(e, folder, 'folder')}
-          onDragStart={(e: DragEvent<HTMLDivElement>) => handleDragStart(e, folder, 'folder')}
+          onDragStart={(e: DragEvent<HTMLDivElement>) => handleDragStart(e, folder, 'folder', files, folders)}
           onDragEnd={handleDragEnd}
           onDragOver={(e: DragEvent<HTMLDivElement>) => handleDragOver(e, folder)}
           onDragLeave={handleDragLeave}
@@ -86,6 +87,11 @@ export const FileList = memo(function FileList({
           <div className="flex items-center gap-2 min-w-0">
             <Folder size={16} strokeWidth={2} className="text-[var(--text-secondary)] flex-shrink-0" />
             <span className="truncate text-sm text-[var(--text-primary)]">{folder.name}</span>
+            {selectedItems.has(folder.id) && dragCount > 1 && (
+              <span className="ml-1 px-1.5 py-0.5 text-[10px] bg-[var(--accent-color)] text-white rounded-full">
+                {dragCount}
+              </span>
+            )}
           </div>
           <span className="text-sm text-[var(--text-tertiary)]">—</span>
           <span className="text-sm text-[var(--text-tertiary)]">
@@ -111,12 +117,17 @@ export const FileList = memo(function FileList({
             onClick={(e) => handleClick(e, file, 'file')}
             onDoubleClick={() => handleDoubleClick(file, 'file')}
             onContextMenu={(e) => onContextMenu(e, file, 'file')}
-            onDragStart={(e: DragEvent<HTMLDivElement>) => handleDragStart(e, file, 'file')}
+            onDragStart={(e: DragEvent<HTMLDivElement>) => handleDragStart(e, file, 'file', files, folders)}
             onDragEnd={handleDragEnd}
           >
             <div className="flex items-center gap-2 min-w-0">
               <Icon size={16} strokeWidth={2} className="text-[var(--text-secondary)] flex-shrink-0" />
               <span className="truncate text-sm text-[var(--text-primary)]">{file.name}</span>
+              {selectedItems.has(file.id) && dragCount > 1 && (
+                <span className="ml-1 px-1.5 py-0.5 text-[10px] bg-[var(--accent-color)] text-white rounded-full">
+                  {dragCount}
+                </span>
+              )}
             </div>
             <span className="text-sm text-[var(--text-tertiary)]">
               {formatFileSize(file.size)}

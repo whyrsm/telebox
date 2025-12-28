@@ -17,7 +17,7 @@ import { Response } from 'express';
 import { FilesService } from './files.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
-import { MoveFileDto, RenameFileDto } from './dto/file.dto';
+import { MoveFileDto, BatchMoveFilesDto, RenameFileDto } from './dto/file.dto';
 
 @Controller('files')
 @UseGuards(JwtAuthGuard)
@@ -68,6 +68,14 @@ export class FilesController {
     @CurrentUser() user: { sub: string },
   ) {
     return this.filesService.upload(user.sub, file, folderId);
+  }
+
+  @Patch('batch/move')
+  batchMove(
+    @Body() dto: BatchMoveFilesDto,
+    @CurrentUser() user: { sub: string },
+  ) {
+    return this.filesService.batchMove(user.sub, dto);
   }
 
   @Patch(':id/move')

@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { TelegramService } from '../telegram/telegram.service';
 import { AuthService } from '../auth/auth.service';
-import { MoveFileDto, RenameFileDto } from './dto/file.dto';
+import { MoveFileDto, BatchMoveFilesDto, RenameFileDto } from './dto/file.dto';
 
 interface PrismaFile {
   id: string;
@@ -114,6 +114,23 @@ export class FilesService {
       data: { folderId: dto.folderId || null },
     });
     return this.serializeFile(updated);
+  }
+
+  async batchMove(userId: string, dto: BatchMoveFilesDto) {
+    // Verify all files belong to user
+    const files = await this.prisma.file.findMany({
+      where: { id: { in: dto.fileIds }, userId },
+    });
+    if (files.length !== dto.fileIds.length) {
+      throw new NotFoundException('One or more files not found');
+    }
+
+    await this.prisma.file.updateMany({
+      where: { id: { in: dto.fileIds }, userId },
+      data: { folderId: dto.folderId || null },
+    });
+
+    return { count: dto.fileIds.length };
   }
 
   async rename(id: string, userId: string, dto: RenameFileDto) {

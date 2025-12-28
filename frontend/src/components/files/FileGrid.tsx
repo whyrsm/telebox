@@ -29,6 +29,7 @@ export const FileGrid = memo(function FileGrid({
   const { selectedItems } = useDriveStore();
   const { handleClick, handleDoubleClick } = useFileItemHandlers(onFolderOpen, onFileOpen);
   const {
+    dragCount,
     dropTargetId,
     successFlashId,
     lastMoveResult,
@@ -62,7 +63,7 @@ export const FileGrid = memo(function FileGrid({
           data-folder-item
           draggable
           className={cn(
-            'flex flex-col items-center p-3 rounded cursor-pointer transition-all duration-200',
+            'flex flex-col items-center p-3 rounded cursor-pointer transition-all duration-200 relative',
             'hover:bg-[var(--bg-hover)]',
             selectedItems.has(folder.id) && 'bg-[var(--selected-bg)]',
             dropTargetId === folder.id && 'ring-2 ring-[var(--accent-color)] bg-[var(--bg-hover)]',
@@ -71,12 +72,17 @@ export const FileGrid = memo(function FileGrid({
           onClick={(e) => handleClick(e, folder, 'folder')}
           onDoubleClick={() => handleDoubleClick(folder, 'folder')}
           onContextMenu={(e) => onContextMenu(e, folder, 'folder')}
-          onDragStart={(e: DragEvent<HTMLDivElement>) => handleDragStart(e, folder, 'folder')}
+          onDragStart={(e: DragEvent<HTMLDivElement>) => handleDragStart(e, folder, 'folder', files, folders)}
           onDragEnd={handleDragEnd}
           onDragOver={(e: DragEvent<HTMLDivElement>) => handleDragOver(e, folder)}
           onDragLeave={handleDragLeave}
           onDrop={(e: DragEvent<HTMLDivElement>) => handleDrop(e, folder)}
         >
+          {selectedItems.has(folder.id) && dragCount > 1 && (
+            <span className="absolute top-1 right-1 px-1.5 py-0.5 text-[10px] bg-[var(--accent-color)] text-white rounded-full">
+              {dragCount}
+            </span>
+          )}
           <Folder size={40} strokeWidth={1.5} className="text-[var(--text-secondary)] mb-2" />
           <span className="text-xs text-center truncate w-full text-[var(--text-primary)]">{folder.name}</span>
         </div>
@@ -92,16 +98,21 @@ export const FileGrid = memo(function FileGrid({
             data-file-item
             draggable
             className={cn(
-              'flex flex-col items-center p-3 rounded cursor-pointer transition-colors',
+              'flex flex-col items-center p-3 rounded cursor-pointer transition-colors relative',
               'hover:bg-[var(--bg-hover)]',
               selectedItems.has(file.id) && 'bg-[var(--selected-bg)]'
             )}
             onClick={(e) => handleClick(e, file, 'file')}
             onDoubleClick={() => handleDoubleClick(file, 'file')}
             onContextMenu={(e) => onContextMenu(e, file, 'file')}
-            onDragStart={(e: DragEvent<HTMLDivElement>) => handleDragStart(e, file, 'file')}
+            onDragStart={(e: DragEvent<HTMLDivElement>) => handleDragStart(e, file, 'file', files, folders)}
             onDragEnd={handleDragEnd}
           >
+            {selectedItems.has(file.id) && dragCount > 1 && (
+              <span className="absolute top-1 right-1 px-1.5 py-0.5 text-[10px] bg-[var(--accent-color)] text-white rounded-full">
+                {dragCount}
+              </span>
+            )}
             <Icon size={40} strokeWidth={1.5} className="text-[var(--text-secondary)] mb-2" />
             <span className="text-xs text-center truncate w-full text-[var(--text-primary)]">{file.name}</span>
             <span className="text-[10px] text-[var(--text-tertiary)]">

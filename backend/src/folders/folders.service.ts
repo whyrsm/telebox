@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { CreateFolderDto, UpdateFolderDto, MoveFolderDto } from './dto/folder.dto';
+import { CreateFolderDto, UpdateFolderDto, MoveFolderDto, BatchMoveFoldersDto } from './dto/folder.dto';
 
 export interface PrismaFolder {
   id: string;
@@ -65,6 +65,32 @@ export class FoldersService {
       where: { id },
       data: { parentId: dto.parentId || null },
     });
+  }
+
+  async batchMove(userId: string, dto: BatchMoveFoldersDto) {
+    // Verify all folders belong to user
+    const folders = await this.prisma.folder.findMany({
+      where: { id: { in: dto.folderIds }, userId },
+    });
+    if (folders.length !== dto.folderIds.length) {
+      throw new NotFoundException('One or more folders not found');
+    }
+
+    // Verify target folder if specified
+    if (dto.parentId) {
+      await this.findOne(dto.parentId, userId);
+      // Prevent moving folder into itself or its children
+      if (dto.folderIds.includes(dto.parentId)) {
+        throw new NotFoundException('Cannot move folder into itself');
+      }
+    }
+
+    await this.prisma.folder.updateMany({
+      where: { id: { in: dto.folderIds }, userId },
+      data: { parentId: dto.parentId || null },
+    });
+
+    return { count: dto.folderIds.length };
   }
 
   async remove(id: string, userId: string) {

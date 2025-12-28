@@ -67,6 +67,20 @@ export function useMoveFolder() {
   });
 }
 
+export function useBatchMoveFolders() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ folderIds, parentId }: { folderIds: string[]; parentId?: string | null; sourceParentId?: string | null }) =>
+      foldersApi.batchMove(folderIds, parentId),
+    onSuccess: (_, { parentId, sourceParentId }) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.folders.list(sourceParentId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.folders.list(parentId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.folders.tree() });
+    },
+  });
+}
+
 export function useDeleteFolder() {
   const queryClient = useQueryClient();
 

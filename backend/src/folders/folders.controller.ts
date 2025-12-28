@@ -12,7 +12,7 @@ import {
 import { FoldersService } from './folders.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
-import { CreateFolderDto, UpdateFolderDto, MoveFolderDto } from './dto/folder.dto';
+import { CreateFolderDto, UpdateFolderDto, MoveFolderDto, BatchMoveFoldersDto } from './dto/folder.dto';
 
 @Controller('folders')
 @UseGuards(JwtAuthGuard)
@@ -40,6 +40,14 @@ export class FoldersController {
   @Post()
   create(@Body() dto: CreateFolderDto, @CurrentUser() user: { sub: string }) {
     return this.foldersService.create(user.sub, dto);
+  }
+
+  @Patch('batch/move')
+  batchMove(
+    @Body() dto: BatchMoveFoldersDto,
+    @CurrentUser() user: { sub: string },
+  ) {
+    return this.foldersService.batchMove(user.sub, dto);
   }
 
   @Patch(':id')
