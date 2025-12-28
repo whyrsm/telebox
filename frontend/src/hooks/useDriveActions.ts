@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { FileItem, FolderItem } from '@/stores/drive.store';
 import {
   useDownloadFile,
@@ -26,6 +26,8 @@ export function useDriveActions(currentFolderId: string | null) {
   const [showUpload, setShowUpload] = useState(false);
   const [showNewFolder, setShowNewFolder] = useState(false);
   const [showRename, setShowRename] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
+  const [previewFile, setPreviewFile] = useState<FileItem | null>(null);
   const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null);
   const [renameItem, setRenameItem] = useState<RenameItem | null>(null);
 
@@ -63,8 +65,39 @@ export function useDriveActions(currentFolderId: string | null) {
   };
 
   const handleFileOpen = (file: FileItem) => {
+    // Check if file can be previewed
+    const previewableMimes = [
+      'image/', 'video/', 'audio/', 'application/pdf', 'text/', 'application/json'
+    ];
+    const canPreview = previewableMimes.some(mime => file.mimeType.startsWith(mime));
+    
+    if (canPreview) {
+      setPreviewFile(file);
+      setShowPreview(true);
+    } else {
+      downloadFile.mutate(file);
+    }
+  };
+
+  const handleDownload = (file: FileItem) => {
     downloadFile.mutate(file);
   };
+
+  const closePreview = () => {
+    setShowPreview(false);
+    setPreviewFile(null);
+  };
+
+  // Listen for preview navigation events
+  useEffect(() => {
+    const handleNavigate = (e: Event) => {
+      const customEvent = e as CustomEvent<FileItem>;
+      setPreviewFile(customEvent.detail);
+    };
+
+    window.addEventListener('preview-navigate', handleNavigate);
+    return () => window.removeEventListener('preview-navigate', handleNavigate);
+  }, []);
 
   const handleContextMenu = (
     e: React.MouseEvent,
@@ -96,6 +129,8 @@ export function useDriveActions(currentFolderId: string | null) {
     showUpload,
     showNewFolder,
     showRename,
+    showPreview,
+    previewFile,
     contextMenu,
     renameItem,
     // Setters
@@ -107,8 +142,10 @@ export function useDriveActions(currentFolderId: string | null) {
     handleRename,
     handleDelete,
     handleFileOpen,
+    handleDownload,
     handleContextMenu,
     openRenameModal,
     closeRenameModal,
+    closePreview,
   };
 }

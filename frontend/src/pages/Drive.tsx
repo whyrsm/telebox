@@ -7,6 +7,7 @@ import { ContextMenu } from '@/components/files/ContextMenu';
 import { UploadModal } from '@/components/modals/UploadModal';
 import { NewFolderModal } from '@/components/modals/NewFolderModal';
 import { RenameModal } from '@/components/modals/RenameModal';
+import { FilePreviewModal } from '@/components/modals/FilePreviewModal';
 import { UploadProgress } from '@/components/upload/UploadProgress';
 import { useDriveStore, FolderItem, FileItem } from '@/stores/drive.store';
 import { useFolders, useFiles, useFileSearch } from '@/lib/queries';
@@ -19,6 +20,8 @@ export function DrivePage() {
     showUpload,
     showNewFolder,
     showRename,
+    showPreview,
+    previewFile,
     contextMenu,
     renameItem,
     setShowUpload,
@@ -28,9 +31,11 @@ export function DrivePage() {
     handleRename,
     handleDelete,
     handleFileOpen,
+    handleDownload,
     handleContextMenu,
     openRenameModal,
     closeRenameModal,
+    closePreview,
   } = useDriveActions(currentFolderId);
 
   // Queries
@@ -92,7 +97,7 @@ export function DrivePage() {
           onClose={() => setContextMenu(null)}
           onDownload={
             contextMenu.type === 'file'
-              ? () => handleFileOpen(contextMenu.item as FileItem)
+              ? () => handleDownload(contextMenu.item as FileItem)
               : undefined
           }
           onRename={openRenameModal}
@@ -121,6 +126,15 @@ export function DrivePage() {
         onClose={closeRenameModal}
         onRename={handleRename}
       />
+
+      {showPreview && previewFile && (
+        <FilePreviewModal
+          file={previewFile}
+          allFiles={displayFiles}
+          onClose={closePreview}
+          onDownload={handleDownload}
+        />
+      )}
 
       <UploadProgress />
     </div>

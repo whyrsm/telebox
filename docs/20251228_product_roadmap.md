@@ -38,11 +38,11 @@ Core functionality is implemented:
 
 | Feature | Status | Priority |
 |---------|--------|----------|
-| Image preview modal | ⬜ Todo | High |
-| Video preview/player | ⬜ Todo | High |
+| Image preview modal | ✅ Done | — |
+| Video preview/player | ✅ Done | — |
 | File type icons | ✅ Done | — |
 | Responsive mobile layout | ⬜ Todo | Medium |
-| Upload progress indicator | ⬜ Todo | Medium |
+| Upload progress indicator | ✅ Done | — |
 | Error handling improvements | ⬜ Todo | Medium |
 
 **Tech Debt:**
@@ -63,8 +63,9 @@ Core functionality is implemented:
 | Bulk file operations | High | Multi-select delete, move |
 | Sort by name/date/size | Medium | Column headers in list view |
 | File sharing (Telegram links) | Medium | Generate share links |
-| PDF preview | Medium | In-app viewer |
-| Audio player | Low | Inline playback |
+| PDF preview | ✅ Done | — |
+| Audio player | ✅ Done | — |
+| Text file preview | ✅ Done | — |
 | Keyboard shortcuts | Low | Navigate, select, delete |
 
 ---
