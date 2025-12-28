@@ -82,6 +82,7 @@ export class ImportService {
   async getDialogFiles(
     userId: string,
     chatId: string,
+    chatType: 'user' | 'group' | 'channel' | 'saved',
     limit = 100,
   ): Promise<FileInfo[]> {
     const client = await this.authService.getClientForUser(userId);
@@ -90,6 +91,7 @@ export class ImportService {
       const messages = await this.telegramService.getMessagesFromChat(
         client,
         chatId,
+        chatType,
         limit,
       );
 
@@ -143,6 +145,7 @@ export class ImportService {
       const forwardedMessages = await this.telegramService.forwardToSavedMessages(
         client,
         dto.chatId,
+        dto.chatType,
         dto.messageIds,
       );
       console.log('Forwarded messages count:', forwardedMessages.length);

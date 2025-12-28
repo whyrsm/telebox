@@ -85,8 +85,8 @@ export const filesApi = {
 // Import
 export const importApi = {
   getDialogs: () => api.get('/import/dialogs'),
-  getDialogFiles: (chatId: string, limit?: number) => 
-    api.get('/import/dialogs/files', { params: { chatId, limit } }),
-  importFiles: (chatId: string, chatName: string, messageIds: number[]) =>
-    api.post('/import', { chatId, chatName, messageIds }),
+  getDialogFiles: (chatId: string, chatType: string, limit?: number) => 
+    api.get('/import/dialogs/files', { params: { chatId, chatType, limit } }),
+  importFiles: (chatId: string, chatName: string, chatType: string, messageIds: number[]) =>
+    api.post('/import', { chatId, chatName, chatType, messageIds }),
 };

@@ -48,7 +48,7 @@ export default function ImportModal({ isOpen, onClose, onImportComplete }: Impor
   const loadFiles = async (dialog: Dialog) => {
     setLoading(true);
     try {
-      const response = await importApi.getDialogFiles(dialog.id);
+      const response = await importApi.getDialogFiles(dialog.id, dialog.type);
       setFiles(response.data);
       setSelectedDialog(dialog);
       setStep('files');
@@ -67,12 +67,14 @@ export default function ImportModal({ isOpen, onClose, onImportComplete }: Impor
       console.log('Starting import:', {
         chatId: selectedDialog.id,
         chatName: selectedDialog.name,
+        chatType: selectedDialog.type,
         messageIds: Array.from(selectedFiles),
       });
       
       const result = await importApi.importFiles(
         selectedDialog.id,
         selectedDialog.name,
+        selectedDialog.type,
         Array.from(selectedFiles)
       );
       

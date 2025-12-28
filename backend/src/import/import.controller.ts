@@ -23,11 +23,13 @@ export class ImportController {
   async getDialogFiles(
     @CurrentUser() user: { sub: string },
     @Query('chatId') chatId: string,
+    @Query('chatType') chatType: string,
     @Query('limit') limit?: string,
   ) {
     return this.importService.getDialogFiles(
       user.sub,
       chatId,
+      chatType as 'user' | 'group' | 'channel' | 'saved',
       limit ? parseInt(limit) : 100,
     );
   }

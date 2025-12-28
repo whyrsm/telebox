@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { TelegramClient, Api } from 'telegram';
 import { StringSession } from 'telegram/sessions';
+import bigInt from 'big-integer';
 import { createCipheriv, createDecipheriv, randomBytes } from 'crypto';
 import { TELEGRAM } from '../common/constants';
 import { TelegramApiError, FileDownloadError } from '../common/errors/file.errors';
@@ -105,20 +106,72 @@ export class TelegramService {
 
   async getMessagesFromChat(
     client: TelegramClient,
-    chatId: string | number,
+    chatId: string,
+    chatType: 'user' | 'group' | 'channel' | 'saved',
     limit = 100,
   ): Promise<Api.Message[]> {
-    const messages = await client.getMessages(chatId, { limit });
-    return messages.filter((m) => m.media) as Api.Message[];
+    try {
+      if (chatType === 'saved' || chatId === 'me') {
+        const messages = await client.getMessages(new Api.InputPeerSelf(), { limit });
+        return messages.filter((m) => m.media) as Api.Message[];
+      }
+      
+      // For channels/groups/users, we need to find the entity from dialogs
+      // This ensures we have the proper access hash
+      const dialogs = await client.getDialogs({ limit: 100 });
+      
+      let targetEntity: any = null;
+      for (const dialog of dialogs) {
+        const entity = (dialog as any).entity;
+        if (entity && entity.id && entity.id.toString() === chatId) {
+          targetEntity = entity;
+          break;
+        }
+      }
+      
+      if (!targetEntity) {
+        throw new Error(`Chat not found: ${chatId}`);
+      }
+      
+      const messages = await client.getMessages(targetEntity, { limit });
+      return messages.filter((m) => m.media) as Api.Message[];
+    } catch (error) {
+      console.error('Error getting messages from chat:', chatId, chatType, error);
+      throw new TelegramApiError(`Failed to get messages from chat: ${(error as Error).message}`);
+    }
   }
 
   async forwardToSavedMessages(
     client: TelegramClient,
-    fromChatId: string | number,
+    fromChatId: string,
+    chatType: 'user' | 'group' | 'channel' | 'saved',
     messageIds: number[],
   ): Promise<Api.Message[]> {
+    let targetEntity: any;
+    
+    if (chatType === 'saved' || fromChatId === 'me') {
+      targetEntity = new Api.InputPeerSelf();
+    } else {
+      // Find the entity from dialogs to get proper access hash
+      const dialogs = await client.getDialogs({ limit: 100 });
+      
+      let foundEntity: any = null;
+      for (const dialog of dialogs) {
+        const entity = (dialog as any).entity;
+        if (entity && entity.id && entity.id.toString() === fromChatId) {
+          foundEntity = entity;
+          break;
+        }
+      }
+      
+      if (!foundEntity) {
+        throw new Error(`Chat not found: ${fromChatId}`);
+      }
+      targetEntity = foundEntity;
+    }
+    
     // First get the original messages to access their media
-    const originalMessages = await client.getMessages(fromChatId, { ids: messageIds });
+    const originalMessages = await client.getMessages(targetEntity, { ids: messageIds });
     const results: Api.Message[] = [];
 
     for (const msg of originalMessages) {
@@ -131,12 +184,10 @@ export class TelegramService {
 
         // Extract file info
         let fileName = 'file';
-        let mimeType = 'application/octet-stream';
 
         if (msg.media instanceof Api.MessageMediaDocument) {
           const doc = msg.media.document;
           if (doc instanceof Api.Document) {
-            mimeType = doc.mimeType || mimeType;
             for (const attr of doc.attributes) {
               if (attr instanceof Api.DocumentAttributeFilename) {
                 fileName = attr.fileName;
@@ -146,7 +197,6 @@ export class TelegramService {
           }
         } else if (msg.media instanceof Api.MessageMediaPhoto) {
           fileName = `photo_${msg.id}.jpg`;
-          mimeType = 'image/jpeg';
         }
 
         // Re-upload to Saved Messages

@@ -1,4 +1,4 @@
-import { IsString, IsArray, IsNotEmpty } from 'class-validator';
+import { IsString, IsArray, IsNotEmpty, IsIn } from 'class-validator';
 
 export class ImportFilesDto {
   @IsString()
@@ -8,6 +8,10 @@ export class ImportFilesDto {
   @IsString()
   @IsNotEmpty()
   chatName: string;
+
+  @IsString()
+  @IsIn(['user', 'group', 'channel', 'saved'])
+  chatType: 'user' | 'group' | 'channel' | 'saved';
 
   @IsArray()
   @IsNotEmpty()
