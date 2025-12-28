@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateFolderDto, UpdateFolderDto, MoveFolderDto } from './dto/folder.dto';
 
-interface PrismaFolder {
+export interface PrismaFolder {
   id: string;
   name: string;
   parentId: string | null;
@@ -11,7 +11,7 @@ interface PrismaFolder {
   updatedAt: Date;
 }
 
-interface FolderWithChildren extends PrismaFolder {
+export interface FolderWithChildren extends PrismaFolder {
   children?: FolderWithChildren[];
 }
 

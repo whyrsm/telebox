@@ -7,6 +7,7 @@ import { ContextMenu } from '@/components/files/ContextMenu';
 import { UploadModal } from '@/components/modals/UploadModal';
 import { NewFolderModal } from '@/components/modals/NewFolderModal';
 import { RenameModal } from '@/components/modals/RenameModal';
+import { UploadProgress } from '@/components/upload/UploadProgress';
 import { useDriveStore, FolderItem, FileItem } from '@/stores/drive.store';
 import { useFolders, useFiles, useFileSearch } from '@/lib/queries';
 import { useDriveActions } from '@/hooks/useDriveActions';
@@ -23,7 +24,6 @@ export function DrivePage() {
     setShowUpload,
     setShowNewFolder,
     setContextMenu,
-    handleUpload,
     handleCreateFolder,
     handleRename,
     handleDelete,
@@ -106,7 +106,7 @@ export function DrivePage() {
       <UploadModal
         isOpen={showUpload}
         onClose={() => setShowUpload(false)}
-        onUpload={handleUpload}
+        folderId={currentFolderId || undefined}
       />
 
       <NewFolderModal
@@ -121,6 +121,8 @@ export function DrivePage() {
         onClose={closeRenameModal}
         onRename={handleRename}
       />
+
+      <UploadProgress />
     </div>
   );
 }

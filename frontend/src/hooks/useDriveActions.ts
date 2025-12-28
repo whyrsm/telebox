@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { FileItem, FolderItem } from '@/stores/drive.store';
 import {
-  useUploadFile,
   useDownloadFile,
   useCreateFolder,
   useUpdateFolder,
@@ -30,22 +29,12 @@ export function useDriveActions(currentFolderId: string | null) {
   const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null);
   const [renameItem, setRenameItem] = useState<RenameItem | null>(null);
 
-  const uploadFile = useUploadFile();
   const downloadFile = useDownloadFile();
   const createFolder = useCreateFolder();
   const updateFolder = useUpdateFolder();
   const deleteFolder = useDeleteFolder();
   const renameFile = useRenameFile();
   const deleteFile = useDeleteFile();
-
-  const handleUpload = async (filesToUpload: File[]) => {
-    for (const file of filesToUpload) {
-      await uploadFile.mutateAsync({
-        file,
-        folderId: currentFolderId || undefined,
-      });
-    }
-  };
 
   const handleCreateFolder = (name: string) => {
     createFolder.mutate({
@@ -114,7 +103,6 @@ export function useDriveActions(currentFolderId: string | null) {
     setShowNewFolder,
     setContextMenu,
     // Handlers
-    handleUpload,
     handleCreateFolder,
     handleRename,
     handleDelete,

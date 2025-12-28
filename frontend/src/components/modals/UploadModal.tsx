@@ -1,17 +1,19 @@
 import { useState, useRef } from 'react';
 import { X, Upload, File } from 'lucide-react';
 import { cn, formatFileSize } from '@/lib/utils';
+import { useUploadStore } from '@/stores/upload.store';
 
 interface UploadModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onUpload: (files: File[]) => void;
+  folderId?: string;
 }
 
-export function UploadModal({ isOpen, onClose, onUpload }: UploadModalProps) {
+export function UploadModal({ isOpen, onClose, folderId }: UploadModalProps) {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [isDragging, setIsDragging] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const { addUploads } = useUploadStore();
 
   if (!isOpen) return null;
 
@@ -35,7 +37,7 @@ export function UploadModal({ isOpen, onClose, onUpload }: UploadModalProps) {
 
   const handleUpload = () => {
     if (selectedFiles.length > 0) {
-      onUpload(selectedFiles);
+      addUploads(selectedFiles, folderId);
       setSelectedFiles([]);
       onClose();
     }

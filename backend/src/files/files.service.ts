@@ -16,7 +16,7 @@ interface PrismaFile {
   updatedAt: Date;
 }
 
-interface SerializedFile {
+export interface SerializedFile {
   id: string;
   name: string;
   size: string;
