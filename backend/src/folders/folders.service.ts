@@ -2,6 +2,19 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateFolderDto, UpdateFolderDto, MoveFolderDto } from './dto/folder.dto';
 
+interface PrismaFolder {
+  id: string;
+  name: string;
+  parentId: string | null;
+  userId: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+interface FolderWithChildren extends PrismaFolder {
+  children?: FolderWithChildren[];
+}
+
 @Injectable()
 export class FoldersService {
   constructor(private prisma: PrismaService) {}
@@ -59,7 +72,7 @@ export class FoldersService {
     return this.prisma.folder.delete({ where: { id } });
   }
 
-  async getFolderTree(userId: string) {
+  async getFolderTree(userId: string): Promise<FolderWithChildren[]> {
     const folders = await this.prisma.folder.findMany({
       where: { userId },
       orderBy: { name: 'asc' },
@@ -67,7 +80,10 @@ export class FoldersService {
     return this.buildTree(folders);
   }
 
-  private buildTree(folders: any[], parentId: string | null = null): any[] {
+  private buildTree(
+    folders: PrismaFolder[],
+    parentId: string | null = null,
+  ): FolderWithChildren[] {
     return folders
       .filter((f) => f.parentId === parentId)
       .map((f) => ({

@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { AxiosError } from 'axios';
 import { cn } from '@/lib/utils';
 import { authApi } from '@/lib/api';
 import { useAuthStore } from '@/stores/auth.store';
+import { ERROR_MESSAGES } from '@/lib/constants';
 
 type Step = 'phone' | 'code';
 
@@ -26,8 +28,9 @@ export function LoginPage() {
       const { data } = await authApi.sendCode(phone);
       setTempToken(data.tempToken);
       setStep('code');
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to send code');
+    } catch (error) {
+      const axiosError = error as AxiosError<{ message: string }>;
+      setError(axiosError.response?.data?.message || ERROR_MESSAGES.SEND_CODE_FAILED);
     } finally {
       setIsLoading(false);
     }
@@ -42,8 +45,9 @@ export function LoginPage() {
       const { data } = await authApi.verify(tempToken, code);
       login(data.accessToken);
       navigate('/');
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Invalid code');
+    } catch (error) {
+      const axiosError = error as AxiosError<{ message: string }>;
+      setError(axiosError.response?.data?.message || ERROR_MESSAGES.INVALID_CODE);
     } finally {
       setIsLoading(false);
     }

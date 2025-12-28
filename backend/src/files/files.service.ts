@@ -4,6 +4,30 @@ import { TelegramService } from '../telegram/telegram.service';
 import { AuthService } from '../auth/auth.service';
 import { MoveFileDto, RenameFileDto } from './dto/file.dto';
 
+interface PrismaFile {
+  id: string;
+  name: string;
+  size: bigint;
+  mimeType: string;
+  messageId: bigint;
+  folderId: string | null;
+  userId: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+interface SerializedFile {
+  id: string;
+  name: string;
+  size: string;
+  mimeType: string;
+  messageId: string;
+  folderId: string | null;
+  userId: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 @Injectable()
 export class FilesService {
   constructor(
@@ -68,7 +92,7 @@ export class FilesService {
     }
   }
 
-  async download(id: string, userId: string): Promise<{ buffer: Buffer; file: any }> {
+  async download(id: string, userId: string): Promise<{ buffer: Buffer; file: SerializedFile }> {
     const file = await this.findOneRaw(id, userId);
     const client = await this.authService.getClientForUser(userId);
     
@@ -125,7 +149,7 @@ export class FilesService {
     return files.map(this.serializeFile);
   }
 
-  private serializeFile(file: any) {
+  private serializeFile(file: PrismaFile): SerializedFile {
     return {
       ...file,
       size: file.size.toString(),

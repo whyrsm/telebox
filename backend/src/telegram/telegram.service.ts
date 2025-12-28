@@ -3,6 +3,8 @@ import { ConfigService } from '@nestjs/config';
 import { TelegramClient, Api } from 'telegram';
 import { StringSession } from 'telegram/sessions';
 import { createCipheriv, createDecipheriv, randomBytes } from 'crypto';
+import { TELEGRAM } from '../common/constants';
+import { TelegramApiError, FileDownloadError } from '../common/errors/file.errors';
 
 @Injectable()
 export class TelegramService {
@@ -19,7 +21,7 @@ export class TelegramService {
   async createClient(sessionString?: string): Promise<TelegramClient> {
     const session = new StringSession(sessionString || '');
     const client = new TelegramClient(session, this.apiId, this.apiHash, {
-      connectionRetries: 5,
+      connectionRetries: TELEGRAM.CONNECTION_RETRIES,
     });
     await client.connect();
     return client;
@@ -63,7 +65,7 @@ export class TelegramService {
     fileName: string,
     mimeType: string,
   ): Promise<Api.Message> {
-    const result = await client.sendFile('me', {
+    const result = await client.sendFile(TELEGRAM.SAVED_MESSAGES, {
       file: buffer,
       caption: fileName,
       forceDocument: true,
@@ -75,20 +77,24 @@ export class TelegramService {
   }
 
   async downloadFile(client: TelegramClient, messageId: number): Promise<Buffer> {
-    const messages = await client.getMessages('me', { ids: messageId });
-    if (!messages.length || !messages[0].media) {
-      throw new Error('Message or media not found');
+    try {
+      const messages = await client.getMessages(TELEGRAM.SAVED_MESSAGES, { ids: messageId });
+      if (!messages.length || !messages[0].media) {
+        throw new FileDownloadError('Message or media not found');
+      }
+      const buffer = await client.downloadMedia(messages[0].media);
+      return buffer as Buffer;
+    } catch (error) {
+      throw new FileDownloadError('Failed to download file from Telegram', error as Error);
     }
-    const buffer = await client.downloadMedia(messages[0].media);
-    return buffer as Buffer;
   }
 
   async deleteMessage(client: TelegramClient, messageId: number): Promise<void> {
-    await client.deleteMessages('me', [messageId], { revoke: true });
+    await client.deleteMessages(TELEGRAM.SAVED_MESSAGES, [messageId], { revoke: true });
   }
 
   async getMessages(client: TelegramClient, limit = 100): Promise<Api.Message[]> {
-    const messages = await client.getMessages('me', { limit });
+    const messages = await client.getMessages(TELEGRAM.SAVED_MESSAGES, { limit });
     return messages.filter((m) => m.media) as Api.Message[];
   }
 

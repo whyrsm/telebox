@@ -1,27 +1,8 @@
-import {
-  Folder,
-  File,
-  Image,
-  Video,
-  Music,
-  FileText,
-  Archive,
-  FileSpreadsheet,
-  Loader2,
-} from 'lucide-react';
+import { Folder, Loader2 } from 'lucide-react';
 import { cn, formatFileSize, getFileIcon } from '@/lib/utils';
 import { useDriveStore, FileItem, FolderItem } from '@/stores/drive.store';
-
-const iconMap: Record<string, React.ElementType> = {
-  image: Image,
-  video: Video,
-  audio: Music,
-  pdf: FileText,
-  archive: Archive,
-  doc: FileText,
-  sheet: FileSpreadsheet,
-  file: File,
-};
+import { FILE_ICON_MAP } from '@/lib/constants';
+import { useFileItemHandlers } from '@/hooks/useFileItemHandlers';
 
 interface FileGridProps {
   files: FileItem[];
@@ -40,21 +21,8 @@ export function FileGrid({
   onFileOpen,
   onContextMenu,
 }: FileGridProps) {
-  const { selectedItems, toggleSelect } = useDriveStore();
-
-  const handleClick = (e: React.MouseEvent, id: string) => {
-    if (e.ctrlKey || e.metaKey) {
-      toggleSelect(id);
-    }
-  };
-
-  const handleDoubleClick = (item: FileItem | FolderItem, type: 'file' | 'folder') => {
-    if (type === 'folder') {
-      onFolderOpen(item as FolderItem);
-    } else {
-      onFileOpen(item as FileItem);
-    }
-  };
+  const { selectedItems } = useDriveStore();
+  const { handleClick, handleDoubleClick } = useFileItemHandlers(onFolderOpen, onFileOpen);
 
   if (isLoading) {
     return (
@@ -85,7 +53,7 @@ export function FileGrid({
 
       {files.map((file) => {
         const iconType = getFileIcon(file.mimeType);
-        const Icon = iconMap[iconType] || File;
+        const Icon = FILE_ICON_MAP[iconType];
 
         return (
           <div

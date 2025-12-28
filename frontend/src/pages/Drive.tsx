@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { Header } from '@/components/layout/Header';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
@@ -8,49 +7,36 @@ import { ContextMenu } from '@/components/files/ContextMenu';
 import { UploadModal } from '@/components/modals/UploadModal';
 import { NewFolderModal } from '@/components/modals/NewFolderModal';
 import { RenameModal } from '@/components/modals/RenameModal';
-import { useDriveStore, FileItem, FolderItem } from '@/stores/drive.store';
-import {
-  useFolders,
-  useCreateFolder,
-  useUpdateFolder,
-  useDeleteFolder,
-  useFiles,
-  useFileSearch,
-  useUploadFile,
-  useDownloadFile,
-  useRenameFile,
-  useDeleteFile,
-} from '@/lib/queries';
-
-interface ContextMenuState {
-  x: number;
-  y: number;
-  item: FileItem | FolderItem;
-  type: 'file' | 'folder';
-}
+import { useDriveStore, FolderItem, FileItem } from '@/stores/drive.store';
+import { useFolders, useFiles, useFileSearch } from '@/lib/queries';
+import { useDriveActions } from '@/hooks/useDriveActions';
 
 export function DrivePage() {
   const { currentFolderId, viewMode, searchQuery, setSearchQuery, addToPath } = useDriveStore();
 
-  const [showUpload, setShowUpload] = useState(false);
-  const [showNewFolder, setShowNewFolder] = useState(false);
-  const [showRename, setShowRename] = useState(false);
-  const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null);
-  const [renameItem, setRenameItem] = useState<{ id: string; name: string; type: 'file' | 'folder' } | null>(null);
+  const {
+    showUpload,
+    showNewFolder,
+    showRename,
+    contextMenu,
+    renameItem,
+    setShowUpload,
+    setShowNewFolder,
+    setContextMenu,
+    handleUpload,
+    handleCreateFolder,
+    handleRename,
+    handleDelete,
+    handleFileOpen,
+    handleContextMenu,
+    openRenameModal,
+    closeRenameModal,
+  } = useDriveActions(currentFolderId);
 
   // Queries
   const { data: folders = [], isLoading: foldersLoading } = useFolders(currentFolderId);
   const { data: files = [], isLoading: filesLoading } = useFiles(currentFolderId);
   const { data: searchResults = [] } = useFileSearch(searchQuery);
-
-  // Mutations
-  const uploadFile = useUploadFile();
-  const downloadFile = useDownloadFile();
-  const createFolder = useCreateFolder();
-  const updateFolder = useUpdateFolder();
-  const deleteFolder = useDeleteFolder();
-  const renameFile = useRenameFile();
-  const deleteFile = useDeleteFile();
 
   const isLoading = foldersLoading || filesLoading;
   const displayFiles = searchQuery ? searchResults : files;
@@ -58,54 +44,6 @@ export function DrivePage() {
 
   const handleFolderOpen = (folder: FolderItem) => {
     addToPath(folder);
-  };
-
-  const handleFileOpen = (file: FileItem) => {
-    downloadFile.mutate(file);
-  };
-
-  const handleContextMenu = (
-    e: React.MouseEvent,
-    item: FileItem | FolderItem,
-    type: 'file' | 'folder'
-  ) => {
-    e.preventDefault();
-    setContextMenu({ x: e.clientX, y: e.clientY, item, type });
-  };
-
-  const handleUpload = async (filesToUpload: File[]) => {
-    for (const file of filesToUpload) {
-      await uploadFile.mutateAsync({
-        file,
-        folderId: currentFolderId || undefined,
-      });
-    }
-  };
-
-  const handleCreateFolder = (name: string) => {
-    createFolder.mutate({
-      name,
-      parentId: currentFolderId || undefined,
-    });
-  };
-
-  const handleRename = (name: string) => {
-    if (!renameItem) return;
-    if (renameItem.type === 'folder') {
-      updateFolder.mutate({ id: renameItem.id, name });
-    } else {
-      renameFile.mutate({ id: renameItem.id, name });
-    }
-  };
-
-  const handleDelete = () => {
-    if (!contextMenu) return;
-    if (contextMenu.type === 'folder') {
-      deleteFolder.mutate(contextMenu.item.id);
-    } else {
-      deleteFile.mutate(contextMenu.item.id);
-    }
-    setContextMenu(null);
   };
 
   const handleSearch = (query: string) => {
@@ -157,15 +95,7 @@ export function DrivePage() {
               ? () => handleFileOpen(contextMenu.item as FileItem)
               : undefined
           }
-          onRename={() => {
-            setRenameItem({
-              id: contextMenu.item.id,
-              name: contextMenu.item.name,
-              type: contextMenu.type,
-            });
-            setShowRename(true);
-            setContextMenu(null);
-          }}
+          onRename={openRenameModal}
           onMove={() => {
             // TODO: Implement move modal
           }}
@@ -188,10 +118,7 @@ export function DrivePage() {
       <RenameModal
         isOpen={showRename}
         currentName={renameItem?.name || ''}
-        onClose={() => {
-          setShowRename(false);
-          setRenameItem(null);
-        }}
+        onClose={closeRenameModal}
         onRename={handleRename}
       />
     </div>

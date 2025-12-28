@@ -3,6 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../prisma/prisma.service';
 import { TelegramService } from '../telegram/telegram.service';
 import { TelegramClient } from 'telegram';
+import { AUTH } from '../common/constants';
 
 interface PendingAuth {
   client: TelegramClient;
@@ -24,7 +25,7 @@ export class AuthService {
     const client = await this.telegramService.createClient();
     const { phoneCodeHash } = await this.telegramService.sendCode(client, phone);
     
-    const tempToken = this.jwtService.sign({ phone }, { expiresIn: '10m' });
+    const tempToken = this.jwtService.sign({ phone }, { expiresIn: AUTH.CODE_EXPIRY });
     this.pendingAuths.set(tempToken, { client, phoneCodeHash, phone });
     
     return { tempToken };
