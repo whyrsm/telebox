@@ -48,7 +48,7 @@ export function FileList({
             'hover:bg-[var(--hover-bg)] border-b border-[var(--border-color)]',
             selectedItems.has(folder.id) && 'bg-[var(--selected-bg)]'
           )}
-          onClick={(e) => handleClick(e, folder.id)}
+          onClick={(e) => handleClick(e, folder, 'folder')}
           onDoubleClick={() => handleDoubleClick(folder, 'folder')}
           onContextMenu={(e) => onContextMenu(e, folder, 'folder')}
         >
@@ -75,7 +75,7 @@ export function FileList({
               'hover:bg-[var(--hover-bg)] border-b border-[var(--border-color)]',
               selectedItems.has(file.id) && 'bg-[var(--selected-bg)]'
             )}
-            onClick={(e) => handleClick(e, file.id)}
+            onClick={(e) => handleClick(e, file, 'file')}
             onDoubleClick={() => handleDoubleClick(file, 'file')}
             onContextMenu={(e) => onContextMenu(e, file, 'file')}
           >

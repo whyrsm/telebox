@@ -228,6 +228,11 @@ export class ImportService {
             break;
           }
         }
+
+        // If mimeType is generic, try to detect from filename extension
+        if (mimeType === 'application/octet-stream' && name !== 'Unknown') {
+          mimeType = this.getMimeTypeFromFilename(name) || mimeType;
+        }
       }
     } else if (message.media instanceof Api.MessageMediaPhoto) {
       const photo = message.media.photo;
@@ -252,5 +257,59 @@ export class ImportService {
       mimeType,
       date: new Date(message.date * 1000),
     };
+  }
+
+  private getMimeTypeFromFilename(filename: string): string | null {
+    const ext = filename.split('.').pop()?.toLowerCase();
+    if (!ext) return null;
+
+    const mimeTypes: Record<string, string> = {
+      // Images
+      'png': 'image/png',
+      'jpg': 'image/jpeg',
+      'jpeg': 'image/jpeg',
+      'gif': 'image/gif',
+      'webp': 'image/webp',
+      'svg': 'image/svg+xml',
+      'bmp': 'image/bmp',
+      'ico': 'image/x-icon',
+      // Videos
+      'mp4': 'video/mp4',
+      'webm': 'video/webm',
+      'avi': 'video/x-msvideo',
+      'mov': 'video/quicktime',
+      'mkv': 'video/x-matroska',
+      // Audio
+      'mp3': 'audio/mpeg',
+      'wav': 'audio/wav',
+      'ogg': 'audio/ogg',
+      'flac': 'audio/flac',
+      'm4a': 'audio/mp4',
+      // Documents
+      'pdf': 'application/pdf',
+      'doc': 'application/msword',
+      'docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'xls': 'application/vnd.ms-excel',
+      'xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'ppt': 'application/vnd.ms-powerpoint',
+      'pptx': 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+      // Text
+      'txt': 'text/plain',
+      'json': 'application/json',
+      'xml': 'text/xml',
+      'html': 'text/html',
+      'css': 'text/css',
+      'js': 'text/javascript',
+      'ts': 'text/typescript',
+      'md': 'text/markdown',
+      // Archives
+      'zip': 'application/zip',
+      'rar': 'application/x-rar-compressed',
+      '7z': 'application/x-7z-compressed',
+      'tar': 'application/x-tar',
+      'gz': 'application/gzip',
+    };
+
+    return mimeTypes[ext] || null;
   }
 }

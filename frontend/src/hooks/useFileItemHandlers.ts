@@ -6,9 +6,19 @@ export function useFileItemHandlers(
 ) {
   const { toggleSelect } = useDriveStore();
 
-  const handleClick = (e: React.MouseEvent, id: string) => {
+  const handleClick = (
+    e: React.MouseEvent,
+    item: FileItem | FolderItem,
+    type: 'file' | 'folder'
+  ) => {
     if (e.ctrlKey || e.metaKey) {
-      toggleSelect(id);
+      toggleSelect(item.id);
+      return;
+    }
+
+    // Single click opens files (for preview)
+    if (type === 'file') {
+      onFileOpen(item as FileItem);
     }
   };
 
@@ -16,10 +26,9 @@ export function useFileItemHandlers(
     item: FileItem | FolderItem,
     type: 'file' | 'folder'
   ) => {
+    // Double click opens folders
     if (type === 'folder') {
       onFolderOpen(item as FolderItem);
-    } else {
-      onFileOpen(item as FileItem);
     }
   };
 

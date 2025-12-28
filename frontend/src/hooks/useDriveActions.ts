@@ -69,15 +69,67 @@ export function useDriveActions(currentFolderId: string | null) {
     const previewableMimes = [
       'image/', 'video/', 'audio/', 'application/pdf', 'text/', 'application/json'
     ];
-    const canPreview = previewableMimes.some(mime => file.mimeType.startsWith(mime));
+    
+    // Get effective MIME type - fallback to extension-based detection if generic
+    const effectiveMimeType = file.mimeType === 'application/octet-stream' 
+      ? getMimeTypeFromFilename(file.name) || file.mimeType
+      : file.mimeType;
+    
+    const canPreview = previewableMimes.some(mime => 
+      effectiveMimeType.toLowerCase().startsWith(mime.toLowerCase())
+    );
     
     if (canPreview) {
-      setPreviewFile(file);
+      // Pass the effective MIME type to the preview
+      setPreviewFile({ ...file, mimeType: effectiveMimeType });
       setShowPreview(true);
     } else {
       downloadFile.mutate(file);
     }
   };
+
+// Helper function to detect MIME type from filename
+function getMimeTypeFromFilename(filename: string): string | null {
+  const ext = filename.split('.').pop()?.toLowerCase();
+  if (!ext) return null;
+
+  const mimeTypes: Record<string, string> = {
+    // Images
+    'png': 'image/png',
+    'jpg': 'image/jpeg',
+    'jpeg': 'image/jpeg',
+    'gif': 'image/gif',
+    'webp': 'image/webp',
+    'svg': 'image/svg+xml',
+    'bmp': 'image/bmp',
+    'ico': 'image/x-icon',
+    // Videos
+    'mp4': 'video/mp4',
+    'webm': 'video/webm',
+    'avi': 'video/x-msvideo',
+    'mov': 'video/quicktime',
+    'mkv': 'video/x-matroska',
+    // Audio
+    'mp3': 'audio/mpeg',
+    'wav': 'audio/wav',
+    'ogg': 'audio/ogg',
+    'flac': 'audio/flac',
+    'm4a': 'audio/mp4',
+    // Documents
+    'pdf': 'application/pdf',
+    // Text
+    'txt': 'text/plain',
+    'json': 'application/json',
+    'xml': 'text/xml',
+    'html': 'text/html',
+    'css': 'text/css',
+    'js': 'text/javascript',
+    'ts': 'text/typescript',
+    'md': 'text/markdown',
+  };
+
+  return mimeTypes[ext] || null;
+}
 
   const handleDownload = (file: FileItem) => {
     downloadFile.mutate(file);

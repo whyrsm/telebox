@@ -54,7 +54,7 @@ export class FilesController {
     const { buffer, file } = await this.filesService.download(id, user.sub);
     res.set({
       'Content-Type': file.mimeType,
-      'Content-Disposition': `attachment; filename="${encodeURIComponent(file.name)}"`,
+      'Content-Disposition': `inline; filename="${encodeURIComponent(file.name)}"`,
       'Content-Length': buffer.length,
     });
     res.send(buffer);
