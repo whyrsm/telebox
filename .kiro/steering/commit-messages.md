@@ -3,6 +3,9 @@
 ## Rule
 Use conventional commit format for all commit messages.
 
+## Important
+**Never create commits automatically.** Always wait for explicit user approval before running any `git commit` command. When work is complete, suggest a commit message but do not execute the commit without permission.
+
 ## Format
 ```
 <type>(<scope>): <description>
