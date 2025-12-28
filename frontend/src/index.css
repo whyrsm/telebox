@@ -100,10 +100,25 @@ input {
   50% { opacity: 0.5; }
 }
 
+@keyframes successFlash {
+  0% { 
+    background-color: rgba(16, 185, 129, 0.3);
+    box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.5);
+  }
+  100% { 
+    background-color: transparent;
+    box-shadow: none;
+  }
+}
+
 .animate-fadeIn {
   animation: fadeIn 0.15s ease;
 }
 
 .animate-slideUp {
   animation: slideUp 0.15s ease;
+}
+
+.animate-success-flash {
+  animation: successFlash 0.6s ease-out;
 }

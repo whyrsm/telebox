@@ -1,14 +1,17 @@
-import { memo } from 'react';
+import { memo, DragEvent } from 'react';
 import { Folder, Loader2 } from 'lucide-react';
 import { cn, formatFileSize, getFileIcon } from '@/lib/utils';
 import { useDriveStore, FileItem, FolderItem } from '@/stores/drive.store';
 import { FILE_ICON_MAP } from '@/lib/constants';
 import { useFileItemHandlers } from '@/hooks/useFileItemHandlers';
+import { useDragAndDrop } from '@/hooks/useDragAndDrop';
+import { MoveToast } from '@/components/ui/MoveToast';
 
 interface FileGridProps {
   files: FileItem[];
   folders: FolderItem[];
   isLoading?: boolean;
+  currentFolderId: string | null;
   onFolderOpen: (folder: FolderItem) => void;
   onFileOpen: (file: FileItem) => void;
   onContextMenu: (e: React.MouseEvent, item: FileItem | FolderItem, type: 'file' | 'folder') => void;
@@ -18,12 +21,26 @@ export const FileGrid = memo(function FileGrid({
   files,
   folders,
   isLoading,
+  currentFolderId,
   onFolderOpen,
   onFileOpen,
   onContextMenu,
 }: FileGridProps) {
   const { selectedItems } = useDriveStore();
   const { handleClick, handleDoubleClick } = useFileItemHandlers(onFolderOpen, onFileOpen);
+  const {
+    dropTargetId,
+    successFlashId,
+    lastMoveResult,
+    clearMoveResult,
+    handleDragStart,
+    handleDragEnd,
+    handleDragOver,
+    handleDragLeave,
+    handleDrop,
+    handleDropOnBackground,
+    handleBackgroundDragOver,
+  } = useDragAndDrop(currentFolderId);
 
   if (isLoading) {
     return (
@@ -34,19 +51,31 @@ export const FileGrid = memo(function FileGrid({
   }
 
   return (
-    <div className="grid grid-cols-[repeat(auto-fill,minmax(100px,1fr))] gap-1 p-3">
+    <div 
+      className="grid grid-cols-[repeat(auto-fill,minmax(100px,1fr))] gap-1 p-3"
+      onDragOver={handleBackgroundDragOver}
+      onDrop={handleDropOnBackground}
+    >
       {folders.map((folder) => (
         <div
           key={folder.id}
           data-folder-item
+          draggable
           className={cn(
-            'flex flex-col items-center p-3 rounded cursor-pointer transition-colors',
+            'flex flex-col items-center p-3 rounded cursor-pointer transition-all duration-200',
             'hover:bg-[var(--bg-hover)]',
-            selectedItems.has(folder.id) && 'bg-[var(--selected-bg)]'
+            selectedItems.has(folder.id) && 'bg-[var(--selected-bg)]',
+            dropTargetId === folder.id && 'ring-2 ring-[var(--accent-color)] bg-[var(--bg-hover)]',
+            successFlashId === folder.id && 'animate-success-flash'
           )}
           onClick={(e) => handleClick(e, folder, 'folder')}
           onDoubleClick={() => handleDoubleClick(folder, 'folder')}
           onContextMenu={(e) => onContextMenu(e, folder, 'folder')}
+          onDragStart={(e: DragEvent<HTMLDivElement>) => handleDragStart(e, folder, 'folder')}
+          onDragEnd={handleDragEnd}
+          onDragOver={(e: DragEvent<HTMLDivElement>) => handleDragOver(e, folder)}
+          onDragLeave={handleDragLeave}
+          onDrop={(e: DragEvent<HTMLDivElement>) => handleDrop(e, folder)}
         >
           <Folder size={40} strokeWidth={1.5} className="text-[var(--text-secondary)] mb-2" />
           <span className="text-xs text-center truncate w-full text-[var(--text-primary)]">{folder.name}</span>
@@ -61,6 +90,7 @@ export const FileGrid = memo(function FileGrid({
           <div
             key={file.id}
             data-file-item
+            draggable
             className={cn(
               'flex flex-col items-center p-3 rounded cursor-pointer transition-colors',
               'hover:bg-[var(--bg-hover)]',
@@ -69,6 +99,8 @@ export const FileGrid = memo(function FileGrid({
             onClick={(e) => handleClick(e, file, 'file')}
             onDoubleClick={() => handleDoubleClick(file, 'file')}
             onContextMenu={(e) => onContextMenu(e, file, 'file')}
+            onDragStart={(e: DragEvent<HTMLDivElement>) => handleDragStart(e, file, 'file')}
+            onDragEnd={handleDragEnd}
           >
             <Icon size={40} strokeWidth={1.5} className="text-[var(--text-secondary)] mb-2" />
             <span className="text-xs text-center truncate w-full text-[var(--text-primary)]">{file.name}</span>
@@ -84,6 +116,13 @@ export const FileGrid = memo(function FileGrid({
           <Folder size={40} strokeWidth={1.5} className="mb-2 opacity-50" />
           <p className="text-sm">This folder is empty</p>
         </div>
+      )}
+
+      {lastMoveResult && (
+        <MoveToast
+          message={`Moved "${lastMoveResult.itemName}" to ${lastMoveResult.targetName}`}
+          onClose={clearMoveResult}
+        />
       )}
     </div>
   );

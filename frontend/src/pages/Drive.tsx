@@ -105,6 +105,7 @@ export function DrivePage() {
                 files={displayFiles}
                 folders={displayFolders}
                 isLoading={isLoading}
+                currentFolderId={currentFolderId}
                 onFolderOpen={handleFolderOpen}
                 onFileOpen={handleFileOpen}
                 onContextMenu={handleContextMenu}
@@ -114,6 +115,7 @@ export function DrivePage() {
                 files={displayFiles}
                 folders={displayFolders}
                 isLoading={isLoading}
+                currentFolderId={currentFolderId}
                 onFolderOpen={handleFolderOpen}
                 onFileOpen={handleFileOpen}
                 onContextMenu={handleContextMenu}

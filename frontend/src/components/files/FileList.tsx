@@ -1,14 +1,17 @@
-import { memo } from 'react';
+import { memo, DragEvent } from 'react';
 import { Folder, Loader2 } from 'lucide-react';
 import { cn, formatFileSize, formatDate, getFileIcon } from '@/lib/utils';
 import { useDriveStore, FileItem, FolderItem } from '@/stores/drive.store';
 import { FILE_ICON_MAP } from '@/lib/constants';
 import { useFileItemHandlers } from '@/hooks/useFileItemHandlers';
+import { useDragAndDrop } from '@/hooks/useDragAndDrop';
+import { MoveToast } from '@/components/ui/MoveToast';
 
 interface FileListProps {
   files: FileItem[];
   folders: FolderItem[];
   isLoading?: boolean;
+  currentFolderId: string | null;
   onFolderOpen: (folder: FolderItem) => void;
   onFileOpen: (file: FileItem) => void;
   onContextMenu: (e: React.MouseEvent, item: FileItem | FolderItem, type: 'file' | 'folder') => void;
@@ -18,12 +21,26 @@ export const FileList = memo(function FileList({
   files,
   folders,
   isLoading,
+  currentFolderId,
   onFolderOpen,
   onFileOpen,
   onContextMenu,
 }: FileListProps) {
   const { selectedItems } = useDriveStore();
   const { handleClick, handleDoubleClick } = useFileItemHandlers(onFolderOpen, onFileOpen);
+  const {
+    dropTargetId,
+    successFlashId,
+    lastMoveResult,
+    clearMoveResult,
+    handleDragStart,
+    handleDragEnd,
+    handleDragOver,
+    handleDragLeave,
+    handleDrop,
+    handleDropOnBackground,
+    handleBackgroundDragOver,
+  } = useDragAndDrop(currentFolderId);
 
   if (isLoading) {
     return (
@@ -34,7 +51,11 @@ export const FileList = memo(function FileList({
   }
 
   return (
-    <div className="flex flex-col">
+    <div 
+      className="flex flex-col"
+      onDragOver={handleBackgroundDragOver}
+      onDrop={handleDropOnBackground}
+    >
       <div className="grid grid-cols-[1fr_80px_100px] gap-4 px-4 py-2 text-xs font-medium text-[var(--text-tertiary)] border-b border-[var(--border-color)]">
         <span>Name</span>
         <span>Size</span>
@@ -45,14 +66,22 @@ export const FileList = memo(function FileList({
         <div
           key={folder.id}
           data-folder-item
+          draggable
           className={cn(
-            'grid grid-cols-[1fr_80px_100px] gap-4 px-4 py-2 cursor-pointer transition-colors',
+            'grid grid-cols-[1fr_80px_100px] gap-4 px-4 py-2 cursor-pointer transition-all duration-200',
             'hover:bg-[var(--bg-hover)]',
-            selectedItems.has(folder.id) && 'bg-[var(--selected-bg)]'
+            selectedItems.has(folder.id) && 'bg-[var(--selected-bg)]',
+            dropTargetId === folder.id && 'ring-2 ring-[var(--accent-color)] bg-[var(--bg-hover)]',
+            successFlashId === folder.id && 'animate-success-flash'
           )}
           onClick={(e) => handleClick(e, folder, 'folder')}
           onDoubleClick={() => handleDoubleClick(folder, 'folder')}
           onContextMenu={(e) => onContextMenu(e, folder, 'folder')}
+          onDragStart={(e: DragEvent<HTMLDivElement>) => handleDragStart(e, folder, 'folder')}
+          onDragEnd={handleDragEnd}
+          onDragOver={(e: DragEvent<HTMLDivElement>) => handleDragOver(e, folder)}
+          onDragLeave={handleDragLeave}
+          onDrop={(e: DragEvent<HTMLDivElement>) => handleDrop(e, folder)}
         >
           <div className="flex items-center gap-2 min-w-0">
             <Folder size={16} strokeWidth={2} className="text-[var(--text-secondary)] flex-shrink-0" />
@@ -73,6 +102,7 @@ export const FileList = memo(function FileList({
           <div
             key={file.id}
             data-file-item
+            draggable
             className={cn(
               'grid grid-cols-[1fr_80px_100px] gap-4 px-4 py-2 cursor-pointer transition-colors',
               'hover:bg-[var(--bg-hover)]',
@@ -81,6 +111,8 @@ export const FileList = memo(function FileList({
             onClick={(e) => handleClick(e, file, 'file')}
             onDoubleClick={() => handleDoubleClick(file, 'file')}
             onContextMenu={(e) => onContextMenu(e, file, 'file')}
+            onDragStart={(e: DragEvent<HTMLDivElement>) => handleDragStart(e, file, 'file')}
+            onDragEnd={handleDragEnd}
           >
             <div className="flex items-center gap-2 min-w-0">
               <Icon size={16} strokeWidth={2} className="text-[var(--text-secondary)] flex-shrink-0" />
@@ -101,6 +133,13 @@ export const FileList = memo(function FileList({
           <Folder size={40} strokeWidth={1.5} className="mb-2 opacity-50" />
           <p className="text-sm">This folder is empty</p>
         </div>
+      )}
+
+      {lastMoveResult && (
+        <MoveToast
+          message={`Moved "${lastMoveResult.itemName}" to ${lastMoveResult.targetName}`}
+          onClose={clearMoveResult}
+        />
       )}
     </div>
   );
