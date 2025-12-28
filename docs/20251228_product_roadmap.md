@@ -76,7 +76,8 @@ Core functionality is implemented:
 
 | Feature | Priority | Notes |
 |---------|----------|-------|
-| Import existing Saved Messages | High | Sync existing files |
+| Import existing Saved Messages | ✅ Done | — |
+| Import from groups/private chats | ✅ Done | — |
 | Trash/recycle bin | High | Soft delete with restore |
 | Storage usage stats | Medium | Visual breakdown |
 | Dark/light theme toggle | Medium | System preference detection |

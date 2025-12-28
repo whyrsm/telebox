@@ -81,3 +81,12 @@ export const filesApi = {
   rename: (id: string, name: string) => api.patch(`/files/${id}/rename`, { name }),
   delete: (id: string) => api.delete(`/files/${id}`),
 };
+
+// Import
+export const importApi = {
+  getDialogs: () => api.get('/import/dialogs'),
+  getDialogFiles: (chatId: string, limit?: number) => 
+    api.get('/import/dialogs/files', { params: { chatId, limit } }),
+  importFiles: (chatId: string, chatName: string, messageIds: number[]) =>
+    api.post('/import', { chatId, chatName, messageIds }),
+};

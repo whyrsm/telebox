@@ -6,6 +6,7 @@ import { UsersModule } from './users/users.module';
 import { FoldersModule } from './folders/folders.module';
 import { FilesModule } from './files/files.module';
 import { TelegramModule } from './telegram/telegram.module';
+import { ImportModule } from './import/import.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { TelegramModule } from './telegram/telegram.module';
     FoldersModule,
     FilesModule,
     TelegramModule,
+    ImportModule,
   ],
 })
 export class AppModule {}

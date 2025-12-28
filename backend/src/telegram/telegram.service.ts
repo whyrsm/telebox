@@ -98,6 +98,76 @@ export class TelegramService {
     return messages.filter((m) => m.media) as Api.Message[];
   }
 
+  async getDialogs(client: TelegramClient): Promise<any[]> {
+    const dialogs = await client.getDialogs({ limit: 100 });
+    return dialogs as any[];
+  }
+
+  async getMessagesFromChat(
+    client: TelegramClient,
+    chatId: string | number,
+    limit = 100,
+  ): Promise<Api.Message[]> {
+    const messages = await client.getMessages(chatId, { limit });
+    return messages.filter((m) => m.media) as Api.Message[];
+  }
+
+  async forwardToSavedMessages(
+    client: TelegramClient,
+    fromChatId: string | number,
+    messageIds: number[],
+  ): Promise<Api.Message[]> {
+    // First get the original messages to access their media
+    const originalMessages = await client.getMessages(fromChatId, { ids: messageIds });
+    const results: Api.Message[] = [];
+
+    for (const msg of originalMessages) {
+      if (!msg.media) continue;
+
+      try {
+        // Download the media
+        const buffer = await client.downloadMedia(msg.media);
+        if (!buffer) continue;
+
+        // Extract file info
+        let fileName = 'file';
+        let mimeType = 'application/octet-stream';
+
+        if (msg.media instanceof Api.MessageMediaDocument) {
+          const doc = msg.media.document;
+          if (doc instanceof Api.Document) {
+            mimeType = doc.mimeType || mimeType;
+            for (const attr of doc.attributes) {
+              if (attr instanceof Api.DocumentAttributeFilename) {
+                fileName = attr.fileName;
+                break;
+              }
+            }
+          }
+        } else if (msg.media instanceof Api.MessageMediaPhoto) {
+          fileName = `photo_${msg.id}.jpg`;
+          mimeType = 'image/jpeg';
+        }
+
+        // Re-upload to Saved Messages
+        const result = await client.sendFile(TELEGRAM.SAVED_MESSAGES, {
+          file: buffer as Buffer,
+          caption: fileName,
+          forceDocument: true,
+          attributes: [
+            new Api.DocumentAttributeFilename({ fileName }),
+          ],
+        });
+
+        results.push(result);
+      } catch (err) {
+        console.error('Error processing message:', msg.id, err);
+      }
+    }
+
+    return results;
+  }
+
   encryptSession(sessionString: string): string {
     const iv = randomBytes(16);
     const key = Buffer.from(this.encryptionKey.padEnd(32).slice(0, 32));

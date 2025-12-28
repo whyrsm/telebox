@@ -8,13 +8,18 @@ import { UploadModal } from '@/components/modals/UploadModal';
 import { NewFolderModal } from '@/components/modals/NewFolderModal';
 import { RenameModal } from '@/components/modals/RenameModal';
 import { FilePreviewModal } from '@/components/modals/FilePreviewModal';
+import ImportModal from '@/components/modals/ImportModal';
 import { UploadProgress } from '@/components/upload/UploadProgress';
 import { useDriveStore, FolderItem, FileItem } from '@/stores/drive.store';
 import { useFolders, useFiles, useFileSearch } from '@/lib/queries';
 import { useDriveActions } from '@/hooks/useDriveActions';
+import { useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 
 export function DrivePage() {
   const { currentFolderId, viewMode, searchQuery, setSearchQuery, addToPath } = useDriveStore();
+  const [showImport, setShowImport] = useState(false);
+  const queryClient = useQueryClient();
 
   const {
     showUpload,
@@ -55,12 +60,22 @@ export function DrivePage() {
     setSearchQuery(query);
   };
 
+  const handleImportComplete = () => {
+    // Refresh folders and files after import
+    queryClient.invalidateQueries({ queryKey: ['folders'] });
+    queryClient.invalidateQueries({ queryKey: ['files'] });
+    queryClient.invalidateQueries({ queryKey: ['folderTree'] });
+  };
+
   return (
     <div className="h-screen flex flex-col">
       <Header onUpload={() => setShowUpload(true)} onSearch={handleSearch} />
 
       <div className="flex-1 flex overflow-hidden">
-        <Sidebar onNewFolder={() => setShowNewFolder(true)} />
+        <Sidebar 
+          onNewFolder={() => setShowNewFolder(true)} 
+          onImport={() => setShowImport(true)}
+        />
 
         <main className="flex-1 flex flex-col overflow-hidden">
           <Breadcrumb />
@@ -135,6 +150,12 @@ export function DrivePage() {
           onDownload={handleDownload}
         />
       )}
+
+      <ImportModal
+        isOpen={showImport}
+        onClose={() => setShowImport(false)}
+        onImportComplete={handleImportComplete}
+      />
 
       <UploadProgress />
     </div>
