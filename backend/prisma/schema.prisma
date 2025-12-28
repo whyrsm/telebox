@@ -1,0 +1,60 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String   @id @default(uuid())
+  telegramId    BigInt   @unique @map("telegram_id")
+  phone         String?
+  firstName     String?  @map("first_name")
+  lastName      String?  @map("last_name")
+  sessionString String   @map("session_string") @db.Text
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  folders Folder[]
+  files   File[]
+
+  @@map("users")
+}
+
+model Folder {
+  id        String   @id @default(uuid())
+  name      String
+  parentId  String?  @map("parent_id")
+  parent    Folder?  @relation("FolderTree", fields: [parentId], references: [id], onDelete: Cascade)
+  children  Folder[] @relation("FolderTree")
+  userId    String   @map("user_id")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  files File[]
+
+  @@index([userId, parentId])
+  @@map("folders")
+}
+
+model File {
+  id        String   @id @default(uuid())
+  name      String
+  size      BigInt
+  mimeType  String   @map("mime_type")
+  messageId BigInt   @map("message_id")
+  folderId  String?  @map("folder_id")
+  folder    Folder?  @relation(fields: [folderId], references: [id], onDelete: SetNull)
+  userId    String   @map("user_id")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  thumbnail String?  @db.Text
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([userId, folderId])
+  @@index([messageId])
+  @@map("files")
+}
