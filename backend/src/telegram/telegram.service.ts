@@ -1,8 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { TelegramClient, Api } from 'telegram';
 import { StringSession } from 'telegram/sessions';
-import bigInt from 'big-integer';
 import { createCipheriv, createDecipheriv, randomBytes } from 'crypto';
 import { TELEGRAM } from '../common/constants';
 import { TelegramApiError, FileDownloadError } from '../common/errors/file.errors';
@@ -29,11 +28,32 @@ export class TelegramService {
   }
 
   async sendCode(client: TelegramClient, phone: string): Promise<{ phoneCodeHash: string }> {
-    const result = await client.sendCode(
-      { apiId: this.apiId, apiHash: this.apiHash },
-      phone,
-    );
-    return { phoneCodeHash: result.phoneCodeHash };
+    try {
+      const result = await client.sendCode(
+        { apiId: this.apiId, apiHash: this.apiHash },
+        phone,
+      );
+      return { phoneCodeHash: result.phoneCodeHash };
+    } catch (error: any) {
+      // Map Telegram API errors to user-friendly messages
+      const errorMessage = error.errorMessage || error.message || 'Unknown error';
+      
+      if (errorMessage === 'PHONE_NUMBER_INVALID') {
+        throw new BadRequestException('Invalid phone number format. Please use international format (e.g., +1234567890)');
+      }
+      if (errorMessage === 'PHONE_NUMBER_BANNED') {
+        throw new BadRequestException('This phone number has been banned from Telegram');
+      }
+      if (errorMessage === 'PHONE_NUMBER_FLOOD') {
+        throw new BadRequestException('Too many attempts. Please try again later');
+      }
+      if (errorMessage === 'API_ID_INVALID') {
+        throw new BadRequestException('Server configuration error. Please contact support');
+      }
+      
+      console.error('Telegram sendCode error:', error);
+      throw new BadRequestException(`Failed to send verification code: ${errorMessage}`);
+    }
   }
 
   async signIn(

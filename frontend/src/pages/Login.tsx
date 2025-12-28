@@ -4,7 +4,8 @@ import { AxiosError } from 'axios';
 import { cn } from '@/lib/utils';
 import { authApi } from '@/lib/api';
 import { useAuthStore } from '@/stores/auth.store';
-import { ERROR_MESSAGES } from '@/lib/constants';
+import { ERROR_MESSAGES, mapErrorMessage } from '@/lib/constants';
+import { Alert } from '@/components/ui/Alert';
 
 type Step = 'phone' | 'code';
 
@@ -30,7 +31,14 @@ export function LoginPage() {
       setStep('code');
     } catch (error) {
       const axiosError = error as AxiosError<{ message: string }>;
-      setError(axiosError.response?.data?.message || ERROR_MESSAGES.SEND_CODE_FAILED);
+      const backendMessage = axiosError.response?.data?.message;
+      
+      // Check for network errors
+      if (!axiosError.response) {
+        setError(ERROR_MESSAGES.NETWORK_ERROR);
+      } else {
+        setError(mapErrorMessage(backendMessage) || ERROR_MESSAGES.SEND_CODE_FAILED);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -47,7 +55,14 @@ export function LoginPage() {
       navigate('/');
     } catch (error) {
       const axiosError = error as AxiosError<{ message: string }>;
-      setError(axiosError.response?.data?.message || ERROR_MESSAGES.INVALID_CODE);
+      const backendMessage = axiosError.response?.data?.message;
+      
+      // Check for network errors
+      if (!axiosError.response) {
+        setError(ERROR_MESSAGES.NETWORK_ERROR);
+      } else {
+        setError(mapErrorMessage(backendMessage) || ERROR_MESSAGES.INVALID_CODE);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -90,7 +105,12 @@ export function LoginPage() {
               </div>
 
               {error && (
-                <p className="text-[var(--accent-red)] text-sm mb-4">{error}</p>
+                <Alert 
+                  variant="error" 
+                  message={error} 
+                  onDismiss={() => setError('')}
+                  className="mb-4"
+                />
               )}
 
               <button
@@ -133,7 +153,12 @@ export function LoginPage() {
               </div>
 
               {error && (
-                <p className="text-[var(--accent-red)] text-sm mb-4">{error}</p>
+                <Alert 
+                  variant="error" 
+                  message={error} 
+                  onDismiss={() => setError('')}
+                  className="mb-4"
+                />
               )}
 
               <button
