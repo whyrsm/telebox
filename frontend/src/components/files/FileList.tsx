@@ -43,6 +43,7 @@ export function FileList({
       {folders.map((folder) => (
         <div
           key={folder.id}
+          data-folder-item
           className={cn(
             'grid grid-cols-[1fr_100px_120px] gap-4 px-4 py-2 cursor-pointer',
             'hover:bg-[var(--hover-bg)] border-b border-[var(--border-color)]',
@@ -70,6 +71,7 @@ export function FileList({
         return (
           <div
             key={file.id}
+            data-file-item
             className={cn(
               'grid grid-cols-[1fr_100px_120px] gap-4 px-4 py-2 cursor-pointer',
               'hover:bg-[var(--hover-bg)] border-b border-[var(--border-color)]',

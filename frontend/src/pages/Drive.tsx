@@ -19,6 +19,7 @@ import { useQueryClient } from '@tanstack/react-query';
 export function DrivePage() {
   const { currentFolderId, viewMode, searchQuery, setSearchQuery, addToPath } = useDriveStore();
   const [showImport, setShowImport] = useState(false);
+  const [backgroundContextMenu, setBackgroundContextMenu] = useState<{ x: number; y: number } | null>(null);
   const queryClient = useQueryClient();
 
   const {
@@ -67,6 +68,16 @@ export function DrivePage() {
     queryClient.invalidateQueries({ queryKey: ['folderTree'] });
   };
 
+  const handleBackgroundContextMenu = (e: React.MouseEvent) => {
+    // Only show context menu if clicking on the main content area (not on items)
+    const target = e.target as HTMLElement;
+    if (target.closest('[data-file-item]') || target.closest('[data-folder-item]')) {
+      return;
+    }
+    e.preventDefault();
+    setBackgroundContextMenu({ x: e.clientX, y: e.clientY });
+  };
+
   return (
     <div className="h-screen flex flex-col">
       <Header onUpload={() => setShowUpload(true)} onSearch={handleSearch} />
@@ -80,7 +91,7 @@ export function DrivePage() {
         <main className="flex-1 flex flex-col overflow-hidden">
           <Breadcrumb />
 
-          <div className="flex-1 overflow-auto">
+          <div className="flex-1 overflow-auto" onContextMenu={handleBackgroundContextMenu}>
             {viewMode === 'grid' ? (
               <FileGrid
                 files={displayFiles}
@@ -120,6 +131,26 @@ export function DrivePage() {
             // TODO: Implement move modal
           }}
           onDelete={handleDelete}
+        />
+      )}
+
+      {backgroundContextMenu && (
+        <ContextMenu
+          x={backgroundContextMenu.x}
+          y={backgroundContextMenu.y}
+          type="background"
+          onClose={() => setBackgroundContextMenu(null)}
+          onNewFolder={() => {
+            setShowNewFolder(true);
+            setBackgroundContextMenu(null);
+          }}
+          onUpload={() => {
+            setShowUpload(true);
+            setBackgroundContextMenu(null);
+          }}
+          onRename={() => {}}
+          onMove={() => {}}
+          onDelete={() => {}}
         />
       )}
 

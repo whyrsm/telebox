@@ -1,15 +1,17 @@
-import { Download, Pencil, Trash2, FolderInput } from 'lucide-react';
+import { Download, Pencil, Trash2, FolderInput, FolderPlus, Upload } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface ContextMenuProps {
   x: number;
   y: number;
-  type: 'file' | 'folder';
+  type: 'file' | 'folder' | 'background';
   onClose: () => void;
   onDownload?: () => void;
   onRename: () => void;
   onMove: () => void;
   onDelete: () => void;
+  onNewFolder?: () => void;
+  onUpload?: () => void;
 }
 
 export function ContextMenu({
@@ -21,15 +23,22 @@ export function ContextMenu({
   onRename,
   onMove,
   onDelete,
+  onNewFolder,
+  onUpload,
 }: ContextMenuProps) {
-  const menuItems = [
-    ...(type === 'file' && onDownload
-      ? [{ icon: Download, label: 'Download', onClick: onDownload }]
-      : []),
-    { icon: Pencil, label: 'Rename', onClick: onRename },
-    { icon: FolderInput, label: 'Move to...', onClick: onMove },
-    { icon: Trash2, label: 'Delete', onClick: onDelete, danger: true },
-  ];
+  const menuItems = type === 'background' 
+    ? [
+        { icon: FolderPlus, label: 'New Folder', onClick: onNewFolder || (() => {}) },
+        { icon: Upload, label: 'Upload Files', onClick: onUpload || (() => {}) },
+      ]
+    : [
+        ...(type === 'file' && onDownload
+          ? [{ icon: Download, label: 'Download', onClick: onDownload }]
+          : []),
+        { icon: Pencil, label: 'Rename', onClick: onRename },
+        { icon: FolderInput, label: 'Move to...', onClick: onMove },
+        { icon: Trash2, label: 'Delete', onClick: onDelete, danger: true },
+      ];
 
   return (
     <>

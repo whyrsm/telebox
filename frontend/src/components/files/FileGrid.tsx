@@ -37,6 +37,7 @@ export function FileGrid({
       {folders.map((folder) => (
         <div
           key={folder.id}
+          data-folder-item
           className={cn(
             'flex flex-col items-center p-3 rounded cursor-pointer',
             'hover:bg-[var(--hover-bg)]',
@@ -58,6 +59,7 @@ export function FileGrid({
         return (
           <div
             key={file.id}
+            data-file-item
             className={cn(
               'flex flex-col items-center p-3 rounded cursor-pointer',
               'hover:bg-[var(--hover-bg)]',
