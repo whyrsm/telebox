@@ -1,10 +1,12 @@
-import { memo, DragEvent } from 'react';
+import { memo, DragEvent, useRef } from 'react';
 import { Folder, Loader2, Star } from 'lucide-react';
 import { cn, formatFileSize, getFileIcon } from '@/lib/utils';
 import { useDriveStore, FileItem, FolderItem } from '@/stores/drive.store';
 import { FILE_ICON_MAP } from '@/lib/constants';
 import { useFileItemHandlers } from '@/hooks/useFileItemHandlers';
 import { useDragAndDrop } from '@/hooks/useDragAndDrop';
+import { useSelectionBox } from '@/hooks/useSelectionBox';
+import { useKeyboardSelection } from '@/hooks/useKeyboardSelection';
 import { MoveToast } from '@/components/ui/MoveToast';
 import { EmptyState } from './EmptyState';
 
@@ -31,8 +33,9 @@ export const FileGrid = memo(function FileGrid({
   onUpload,
   onNewFolder,
 }: FileGridProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
   const { selectedItems, clearSelection } = useDriveStore();
-  const { handleClick, handleDoubleClick } = useFileItemHandlers(onFolderOpen, onFileOpen);
+  const { handleClick, handleDoubleClick } = useFileItemHandlers(onFolderOpen, onFileOpen, { files, folders });
   const {
     dragCount,
     dropTargetId,
@@ -48,6 +51,24 @@ export const FileGrid = memo(function FileGrid({
     handleBackgroundDragOver,
   } = useDragAndDrop(currentFolderId);
 
+  const {
+    selectionBoxStyle,
+    isSelecting,
+    handleMouseDown,
+    handleMouseMove,
+    handleMouseUp,
+  } = useSelectionBox({
+    containerRef: containerRef as React.RefObject<HTMLElement>,
+    itemSelector: '[data-item-id]',
+  });
+
+  useKeyboardSelection({
+    files,
+    folders,
+    onFolderOpen,
+    onFileOpen,
+  });
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-16">
@@ -58,6 +79,8 @@ export const FileGrid = memo(function FileGrid({
 
   const handleBackgroundClick = (e: React.MouseEvent) => {
     // Only clear selection if clicking directly on the background, not on items
+    // and not during selection box drag
+    if (isSelecting) return;
     const target = e.target as HTMLElement;
     if (!target.closest('[data-file-item]') && !target.closest('[data-folder-item]')) {
       clearSelection();
@@ -66,15 +89,22 @@ export const FileGrid = memo(function FileGrid({
 
   return (
     <div 
-      className="grid grid-cols-[repeat(auto-fill,minmax(80px,1fr))] sm:grid-cols-[repeat(auto-fill,minmax(100px,1fr))] gap-1 p-2 sm:p-3 min-h-full content-start"
+      ref={containerRef}
+      className="grid grid-cols-[repeat(auto-fill,minmax(80px,1fr))] sm:grid-cols-[repeat(auto-fill,minmax(100px,1fr))] gap-1 p-2 sm:p-3 min-h-full content-start relative select-none"
       onClick={handleBackgroundClick}
+      onMouseDown={handleMouseDown}
+      onMouseMove={handleMouseMove}
+      onMouseUp={handleMouseUp}
       onDragOver={handleBackgroundDragOver}
       onDrop={handleDropOnBackground}
+      tabIndex={0}
     >
+      {selectionBoxStyle && <div style={selectionBoxStyle} />}
       {folders.map((folder) => (
         <div
           key={folder.id}
           data-folder-item
+          data-item-id={folder.id}
           draggable
           className={cn(
             'flex flex-col items-center p-2 sm:p-3 rounded cursor-pointer transition-all duration-200 relative',
@@ -113,6 +143,7 @@ export const FileGrid = memo(function FileGrid({
           <div
             key={file.id}
             data-file-item
+            data-item-id={file.id}
             draggable
             className={cn(
               'flex flex-col items-center p-2 sm:p-3 rounded cursor-pointer transition-colors relative',
