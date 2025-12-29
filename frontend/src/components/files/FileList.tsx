@@ -1,5 +1,5 @@
 import { memo, DragEvent } from 'react';
-import { Folder, Loader2 } from 'lucide-react';
+import { Folder, Loader2, Star } from 'lucide-react';
 import { cn, formatFileSize, formatDate, getFileIcon } from '@/lib/utils';
 import { useDriveStore, FileItem, FolderItem } from '@/stores/drive.store';
 import { FILE_ICON_MAP } from '@/lib/constants';
@@ -18,7 +18,6 @@ interface FileListProps {
   onContextMenu: (e: React.MouseEvent, item: FileItem | FolderItem, type: 'file' | 'folder') => void;
   onUpload?: () => void;
   onNewFolder?: () => void;
-  onImport?: () => void;
 }
 
 export const FileList = memo(function FileList({
@@ -31,7 +30,6 @@ export const FileList = memo(function FileList({
   onContextMenu,
   onUpload,
   onNewFolder,
-  onImport,
 }: FileListProps) {
   const { selectedItems, clearSelection } = useDriveStore();
   const { handleClick, handleDoubleClick } = useFileItemHandlers(onFolderOpen, onFileOpen);
@@ -103,6 +101,9 @@ export const FileList = memo(function FileList({
           <div className="flex items-center gap-2 min-w-0">
             <Folder size={16} strokeWidth={2} className="text-[var(--text-secondary)] flex-shrink-0" />
             <span className="truncate text-sm text-[var(--text-primary)]">{folder.name}</span>
+            {folder.isFavorite && (
+              <Star size={12} className="text-amber-500 fill-amber-500 flex-shrink-0" />
+            )}
             {selectedItems.has(folder.id) && dragCount > 1 && (
               <span className="ml-1 px-1.5 py-0.5 text-[10px] bg-[var(--accent-color)] text-white rounded-full">
                 {dragCount}
@@ -139,6 +140,9 @@ export const FileList = memo(function FileList({
             <div className="flex items-center gap-2 min-w-0">
               <Icon size={16} strokeWidth={2} className="text-[var(--text-secondary)] flex-shrink-0" />
               <span className="truncate text-sm text-[var(--text-primary)]">{file.name}</span>
+              {file.isFavorite && (
+                <Star size={12} className="text-amber-500 fill-amber-500 flex-shrink-0" />
+              )}
               {selectedItems.has(file.id) && dragCount > 1 && (
                 <span className="ml-1 px-1.5 py-0.5 text-[10px] bg-[var(--accent-color)] text-white rounded-full">
                   {dragCount}

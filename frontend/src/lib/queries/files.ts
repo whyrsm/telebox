@@ -110,3 +110,26 @@ export function useDeleteFile() {
     },
   });
 }
+
+export function useFavoriteFiles() {
+  return useQuery({
+    queryKey: queryKeys.files.favorites(),
+    queryFn: async () => {
+      const { data } = await filesApi.favorites();
+      return data as FileItem[];
+    },
+  });
+}
+
+export function useToggleFileFavorite() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id }: { id: string; folderId?: string | null }) =>
+      filesApi.toggleFavorite(id),
+    onSuccess: (_, { folderId }) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.files.list(folderId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.files.favorites() });
+    },
+  });
+}

@@ -9,7 +9,7 @@ export function useFileItemHandlers(
   const handleClick = (
     e: React.MouseEvent,
     item: FileItem | FolderItem,
-    type: 'file' | 'folder'
+    _type: 'file' | 'folder'
   ) => {
     if (e.ctrlKey || e.metaKey) {
       // Ctrl/Cmd+click toggles selection

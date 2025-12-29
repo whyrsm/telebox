@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { ChevronRight, ChevronDown, Folder, HardDrive, Loader2 } from 'lucide-react';
+import { ChevronRight, ChevronDown, Folder, HardDrive, Loader2, Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useDriveStore, FolderItem } from '@/stores/drive.store';
-import { useFolderTree } from '@/lib/queries';
+import { useFolderTree, useFavoriteFolders, useFavoriteFiles } from '@/lib/queries';
 import { NewMenu } from './NewMenu';
 import { StorageIndicator } from './StorageIndicator';
 
@@ -74,8 +74,12 @@ interface SidebarProps {
 }
 
 export function Sidebar({ onNewFolder, onUpload }: SidebarProps) {
-  const { setCurrentFolder, currentFolderId } = useDriveStore();
+  const { setCurrentFolder, setCurrentView, currentFolderId, currentView } = useDriveStore();
   const { data: folderTree = [], isLoading } = useFolderTree();
+  const { data: favoriteFolders = [] } = useFavoriteFolders();
+  const { data: favoriteFiles = [] } = useFavoriteFiles();
+
+  const hasFavorites = favoriteFolders.length > 0 || favoriteFiles.length > 0;
 
   const handleSelectFolder = (folder: FolderItem, path: FolderItem[]) => {
     setCurrentFolder(folder.id, path);
@@ -83,6 +87,10 @@ export function Sidebar({ onNewFolder, onUpload }: SidebarProps) {
 
   const handleGoToRoot = () => {
     setCurrentFolder(null, []);
+  };
+
+  const handleGoToFavorites = () => {
+    setCurrentView('favorites');
   };
 
   return (
@@ -102,12 +110,33 @@ export function Sidebar({ onNewFolder, onUpload }: SidebarProps) {
           className={cn(
             'flex items-center gap-2 px-2 py-1.5 cursor-pointer rounded transition-colors',
             'hover:bg-[var(--bg-hover)]',
-            currentFolderId === null && 'bg-[var(--selected-bg)]'
+            currentView === 'drive' && currentFolderId === null && 'bg-[var(--selected-bg)]'
           )}
           onClick={handleGoToRoot}
         >
           <HardDrive size={14} strokeWidth={2} className="text-[var(--text-secondary)]" />
           <span className="text-sm font-medium text-[var(--text-primary)]">My Drive</span>
+        </div>
+
+        {hasFavorites && (
+          <div
+            className={cn(
+              'flex items-center gap-2 px-2 py-1.5 cursor-pointer rounded transition-colors',
+              'hover:bg-[var(--bg-hover)]',
+              currentView === 'favorites' && 'bg-[var(--selected-bg)]'
+            )}
+            onClick={handleGoToFavorites}
+          >
+            <Star size={14} strokeWidth={2} className="text-amber-500" />
+            <span className="text-sm font-medium text-[var(--text-primary)]">Favorites</span>
+          </div>
+        )}
+
+        {/* Separator between nav items and folder tree */}
+        <div className="my-2 mx-2 border-b border-[var(--border-color)]" />
+
+        <div className="text-[10px] uppercase tracking-wider text-[var(--text-tertiary)] px-2 py-1">
+          Folders
         </div>
 
         <div className="mt-1">

@@ -12,6 +12,7 @@ export const queryKeys = {
     list: (parentId?: string | null) => [...queryKeys.folders.all, 'list', parentId ?? 'root'] as const,
     tree: () => [...queryKeys.folders.all, 'tree'] as const,
     detail: (id: string) => [...queryKeys.folders.all, 'detail', id] as const,
+    favorites: () => [...queryKeys.folders.all, 'favorites'] as const,
   },
 
   // Files
@@ -20,5 +21,6 @@ export const queryKeys = {
     list: (folderId?: string | null) => [...queryKeys.files.all, 'list', folderId ?? 'root'] as const,
     detail: (id: string) => [...queryKeys.files.all, 'detail', id] as const,
     search: (query: string) => [...queryKeys.files.all, 'search', query] as const,
+    favorites: () => [...queryKeys.files.all, 'favorites'] as const,
   },
 };

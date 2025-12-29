@@ -32,6 +32,11 @@ export class FoldersController {
     return this.foldersService.getFolderTree(user.sub);
   }
 
+  @Get('favorites')
+  findFavorites(@CurrentUser() user: { sub: string }) {
+    return this.foldersService.findFavorites(user.sub);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string, @CurrentUser() user: { sub: string }) {
     return this.foldersService.findOne(id, user.sub);
@@ -66,6 +71,14 @@ export class FoldersController {
     @CurrentUser() user: { sub: string },
   ) {
     return this.foldersService.move(id, user.sub, dto);
+  }
+
+  @Patch(':id/favorite')
+  toggleFavorite(
+    @Param('id') id: string,
+    @CurrentUser() user: { sub: string },
+  ) {
+    return this.foldersService.toggleFavorite(id, user.sub);
   }
 
   @Delete(':id')

@@ -12,14 +12,14 @@ import { FilePreviewModal } from '@/components/modals/FilePreviewModal';
 import ImportModal from '@/components/modals/ImportModal';
 import { UploadProgress } from '@/components/upload/UploadProgress';
 import { useDriveStore, FolderItem, FileItem } from '@/stores/drive.store';
-import { useFolders, useFiles, useFileSearch } from '@/lib/queries';
+import { useFolders, useFiles, useFileSearch, useFavoriteFiles, useFavoriteFolders } from '@/lib/queries';
 import { useDriveActions } from '@/hooks/useDriveActions';
 import { useState, useCallback } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useDebouncedCallback } from 'use-debounce';
 
 export function DrivePage() {
-  const { currentFolderId, viewMode, searchQuery, setSearchQuery, addToPath } = useDriveStore();
+  const { currentFolderId, viewMode, searchQuery, setSearchQuery, addToPath, currentView } = useDriveStore();
   const [showImport, setShowImport] = useState(false);
   const [backgroundContextMenu, setBackgroundContextMenu] = useState<{ x: number; y: number } | null>(null);
   const queryClient = useQueryClient();
@@ -48,16 +48,26 @@ export function DrivePage() {
     openDeleteConfirm,
     closeDeleteConfirm,
     closePreview,
+    handleToggleFavorite,
   } = useDriveActions(currentFolderId);
 
   // Queries
   const { data: folders = [], isLoading: foldersLoading } = useFolders(currentFolderId);
   const { data: files = [], isLoading: filesLoading } = useFiles(currentFolderId);
   const { data: searchResults = [] } = useFileSearch(searchQuery);
+  const { data: favoriteFiles = [], isLoading: favFilesLoading } = useFavoriteFiles();
+  const { data: favoriteFolders = [], isLoading: favFoldersLoading } = useFavoriteFolders();
 
-  const isLoading = foldersLoading || filesLoading;
-  const displayFiles = searchQuery ? searchResults : files;
-  const displayFolders = searchQuery ? [] : folders;
+  const isLoading = currentView === 'favorites' 
+    ? favFilesLoading || favFoldersLoading 
+    : foldersLoading || filesLoading;
+  
+  const displayFiles = currentView === 'favorites' 
+    ? favoriteFiles 
+    : (searchQuery ? searchResults : files);
+  const displayFolders = currentView === 'favorites' 
+    ? favoriteFolders 
+    : (searchQuery ? [] : folders);
 
   const handleFolderOpen = useCallback((folder: FolderItem) => {
     addToPath(folder);
@@ -115,7 +125,6 @@ export function DrivePage() {
                 onContextMenu={handleContextMenu}
                 onUpload={() => setShowUpload(true)}
                 onNewFolder={() => setShowNewFolder(true)}
-                onImport={() => setShowImport(true)}
               />
             ) : (
               <FileList
@@ -128,7 +137,6 @@ export function DrivePage() {
                 onContextMenu={handleContextMenu}
                 onUpload={() => setShowUpload(true)}
                 onNewFolder={() => setShowNewFolder(true)}
-                onImport={() => setShowImport(true)}
               />
             )}
           </div>
@@ -140,6 +148,7 @@ export function DrivePage() {
           x={contextMenu.x}
           y={contextMenu.y}
           type={contextMenu.type}
+          isFavorite={'isFavorite' in contextMenu.item ? contextMenu.item.isFavorite : false}
           onClose={() => setContextMenu(null)}
           onDownload={
             contextMenu.type === 'file'
@@ -148,6 +157,7 @@ export function DrivePage() {
           }
           onRename={openRenameModal}
           onDelete={openDeleteConfirm}
+          onToggleFavorite={handleToggleFavorite}
         />
       )}
 

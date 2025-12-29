@@ -3,18 +3,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { TelegramService } from '../telegram/telegram.service';
 import { AuthService } from '../auth/auth.service';
 import { MoveFileDto, BatchMoveFilesDto, RenameFileDto } from './dto/file.dto';
-
-interface PrismaFile {
-  id: string;
-  name: string;
-  size: bigint;
-  mimeType: string;
-  messageId: bigint;
-  folderId: string | null;
-  userId: string;
-  createdAt: Date;
-  updatedAt: Date;
-}
+import { File as PrismaFile } from '@prisma/client';
 
 export interface SerializedFile {
   id: string;
@@ -24,6 +13,7 @@ export interface SerializedFile {
   messageId: string;
   folderId: string | null;
   userId: string;
+  isFavorite: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -164,6 +154,23 @@ export class FilesService {
       orderBy: { name: 'asc' },
     });
     return files.map(this.serializeFile);
+  }
+
+  async findFavorites(userId: string) {
+    const files = await this.prisma.file.findMany({
+      where: { userId, isFavorite: true },
+      orderBy: { name: 'asc' },
+    });
+    return files.map(this.serializeFile);
+  }
+
+  async toggleFavorite(id: string, userId: string) {
+    const file = await this.findOneRaw(id, userId);
+    const updated = await this.prisma.file.update({
+      where: { id },
+      data: { isFavorite: !file.isFavorite },
+    });
+    return this.serializeFile(updated);
   }
 
   private serializeFile(file: PrismaFile): SerializedFile {

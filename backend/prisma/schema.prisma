@@ -24,15 +24,16 @@ model User {
 }
 
 model Folder {
-  id        String   @id @default(uuid())
-  name      String
-  parentId  String?  @map("parent_id")
-  parent    Folder?  @relation("FolderTree", fields: [parentId], references: [id], onDelete: Cascade)
-  children  Folder[] @relation("FolderTree")
-  userId    String   @map("user_id")
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  id         String   @id @default(uuid())
+  name       String
+  parentId   String?  @map("parent_id")
+  parent     Folder?  @relation("FolderTree", fields: [parentId], references: [id], onDelete: Cascade)
+  children   Folder[] @relation("FolderTree")
+  userId     String   @map("user_id")
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  isFavorite Boolean  @default(false) @map("is_favorite")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
 
   files File[]
 
@@ -40,22 +41,24 @@ model Folder {
   @@index([userId])
   @@index([parentId])
   @@index([createdAt])
+  @@index([userId, isFavorite])
   @@map("folders")
 }
 
 model File {
-  id        String   @id @default(uuid())
-  name      String
-  size      BigInt
-  mimeType  String   @map("mime_type")
-  messageId BigInt   @map("message_id")
-  folderId  String?  @map("folder_id")
-  folder    Folder?  @relation(fields: [folderId], references: [id], onDelete: SetNull)
-  userId    String   @map("user_id")
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  thumbnail String?  @db.Text
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  id         String   @id @default(uuid())
+  name       String
+  size       BigInt
+  mimeType   String   @map("mime_type")
+  messageId  BigInt   @map("message_id")
+  folderId   String?  @map("folder_id")
+  folder     Folder?  @relation(fields: [folderId], references: [id], onDelete: SetNull)
+  userId     String   @map("user_id")
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  thumbnail  String?  @db.Text
+  isFavorite Boolean  @default(false) @map("is_favorite")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
 
   @@index([userId, folderId])
   @@index([userId])
@@ -63,5 +66,6 @@ model File {
   @@index([messageId])
   @@index([createdAt])
   @@index([name])
+  @@index([userId, isFavorite])
   @@map("files")
 }

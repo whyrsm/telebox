@@ -7,6 +7,7 @@ export interface FileItem {
   mimeType: string;
   messageId: string;
   folderId: string | null;
+  isFavorite: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -15,17 +16,20 @@ export interface FolderItem {
   id: string;
   name: string;
   parentId: string | null;
+  isFavorite: boolean;
   createdAt: string;
   updatedAt: string;
   children?: FolderItem[];
 }
 
 type ViewMode = 'grid' | 'list';
+type DriveView = 'drive' | 'favorites';
 
 interface DriveState {
   // Navigation
   currentFolderId: string | null;
   folderPath: FolderItem[];
+  currentView: DriveView;
 
   // UI state
   selectedItems: Set<string>;
@@ -34,6 +38,7 @@ interface DriveState {
 
   // Actions
   setCurrentFolder: (folderId: string | null, path?: FolderItem[]) => void;
+  setCurrentView: (view: DriveView) => void;
   setViewMode: (mode: ViewMode) => void;
   setSearchQuery: (query: string) => void;
   toggleSelect: (id: string) => void;
@@ -46,6 +51,7 @@ interface DriveState {
 export const useDriveStore = create<DriveState>((set, get) => ({
   currentFolderId: null,
   folderPath: [],
+  currentView: 'drive',
   selectedItems: new Set(),
   viewMode: 'grid',
   searchQuery: '',
@@ -54,6 +60,15 @@ export const useDriveStore = create<DriveState>((set, get) => ({
     set({
       currentFolderId: folderId,
       folderPath: path || [],
+      selectedItems: new Set(),
+      searchQuery: '',
+      currentView: 'drive',
+    });
+  },
+
+  setCurrentView: (view) => {
+    set({
+      currentView: view,
       selectedItems: new Set(),
       searchQuery: '',
     });

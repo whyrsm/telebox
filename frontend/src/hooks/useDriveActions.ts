@@ -7,6 +7,8 @@ import {
   useDeleteFolder,
   useRenameFile,
   useDeleteFile,
+  useToggleFileFavorite,
+  useToggleFolderFavorite,
 } from '@/lib/queries';
 
 interface RenameItem {
@@ -39,6 +41,8 @@ export function useDriveActions(currentFolderId: string | null) {
   const deleteFolder = useDeleteFolder();
   const renameFile = useRenameFile();
   const deleteFile = useDeleteFile();
+  const toggleFileFavorite = useToggleFileFavorite();
+  const toggleFolderFavorite = useToggleFolderFavorite();
 
   const handleCreateFolder = (name: string) => {
     createFolder.mutate({
@@ -194,6 +198,16 @@ function getMimeTypeFromFilename(filename: string): string | null {
     setRenameItem(null);
   };
 
+  const handleToggleFavorite = () => {
+    if (!contextMenu) return;
+    if (contextMenu.type === 'folder') {
+      toggleFolderFavorite.mutate({ id: contextMenu.item.id, parentId: currentFolderId });
+    } else {
+      toggleFileFavorite.mutate({ id: contextMenu.item.id, folderId: currentFolderId });
+    }
+    setContextMenu(null);
+  };
+
   return {
     // State
     showUpload,
@@ -221,5 +235,6 @@ function getMimeTypeFromFilename(filename: string): string | null {
     openDeleteConfirm,
     closeDeleteConfirm,
     closePreview,
+    handleToggleFavorite,
   };
 }

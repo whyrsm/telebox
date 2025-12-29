@@ -1,14 +1,16 @@
-import { Download, Pencil, Trash2, FolderPlus, Upload } from 'lucide-react';
+import { Download, Pencil, Trash2, FolderPlus, Upload, Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface ContextMenuProps {
   x: number;
   y: number;
   type: 'file' | 'folder' | 'background';
+  isFavorite?: boolean;
   onClose: () => void;
   onDownload?: () => void;
   onRename: () => void;
   onDelete: () => void;
+  onToggleFavorite?: () => void;
   onNewFolder?: () => void;
   onUpload?: () => void;
 }
@@ -17,10 +19,12 @@ export function ContextMenu({
   x,
   y,
   type,
+  isFavorite,
   onClose,
   onDownload,
   onRename,
   onDelete,
+  onToggleFavorite,
   onNewFolder,
   onUpload,
 }: ContextMenuProps) {
@@ -32,6 +36,9 @@ export function ContextMenu({
     : [
         ...(type === 'file' && onDownload
           ? [{ icon: Download, label: 'Download', onClick: onDownload }]
+          : []),
+        ...(onToggleFavorite
+          ? [{ icon: Star, label: isFavorite ? 'Remove from Favorites' : 'Add to Favorites', onClick: onToggleFavorite, highlight: isFavorite }]
           : []),
         { icon: Pencil, label: 'Rename', onClick: onRename },
         { icon: Trash2, label: 'Delete', onClick: onDelete, danger: true },
@@ -57,7 +64,14 @@ export function ContextMenu({
               item.danger ? 'text-[#dc2626]' : 'text-[var(--text-primary)]'
             )}
           >
-            <item.icon size={14} strokeWidth={2} className={item.danger ? '' : 'text-[var(--text-secondary)]'} />
+            <item.icon 
+              size={14} 
+              strokeWidth={2} 
+              className={cn(
+                item.danger ? '' : 'text-[var(--text-secondary)]',
+                'highlight' in item && item.highlight && 'text-amber-500 fill-amber-500'
+              )} 
+            />
             {item.label}
           </button>
         ))}

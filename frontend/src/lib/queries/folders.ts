@@ -93,3 +93,27 @@ export function useDeleteFolder() {
     },
   });
 }
+
+export function useFavoriteFolders() {
+  return useQuery({
+    queryKey: queryKeys.folders.favorites(),
+    queryFn: async () => {
+      const { data } = await foldersApi.favorites();
+      return data as FolderItem[];
+    },
+  });
+}
+
+export function useToggleFolderFavorite() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id }: { id: string; parentId?: string | null }) =>
+      foldersApi.toggleFavorite(id),
+    onSuccess: (_, { parentId }) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.folders.list(parentId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.folders.favorites() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.folders.tree() });
+    },
+  });
+}

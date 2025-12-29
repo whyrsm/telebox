@@ -1,15 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateFolderDto, UpdateFolderDto, MoveFolderDto, BatchMoveFoldersDto } from './dto/folder.dto';
-
-export interface PrismaFolder {
-  id: string;
-  name: string;
-  parentId: string | null;
-  userId: string;
-  createdAt: Date;
-  updatedAt: Date;
-}
+import { Folder as PrismaFolder } from '@prisma/client';
 
 export interface FolderWithChildren extends PrismaFolder {
   children?: FolderWithChildren[];
@@ -104,6 +96,21 @@ export class FoldersService {
       orderBy: { name: 'asc' },
     });
     return this.buildTree(folders);
+  }
+
+  async findFavorites(userId: string) {
+    return this.prisma.folder.findMany({
+      where: { userId, isFavorite: true },
+      orderBy: { name: 'asc' },
+    });
+  }
+
+  async toggleFavorite(id: string, userId: string) {
+    const folder = await this.findOne(id, userId);
+    return this.prisma.folder.update({
+      where: { id },
+      data: { isFavorite: !folder.isFavorite },
+    });
   }
 
   private buildTree(

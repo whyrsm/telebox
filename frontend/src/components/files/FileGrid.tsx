@@ -1,5 +1,5 @@
 import { memo, DragEvent } from 'react';
-import { Folder, Loader2 } from 'lucide-react';
+import { Folder, Loader2, Star } from 'lucide-react';
 import { cn, formatFileSize, getFileIcon } from '@/lib/utils';
 import { useDriveStore, FileItem, FolderItem } from '@/stores/drive.store';
 import { FILE_ICON_MAP } from '@/lib/constants';
@@ -18,7 +18,6 @@ interface FileGridProps {
   onContextMenu: (e: React.MouseEvent, item: FileItem | FolderItem, type: 'file' | 'folder') => void;
   onUpload?: () => void;
   onNewFolder?: () => void;
-  onImport?: () => void;
 }
 
 export const FileGrid = memo(function FileGrid({
@@ -31,7 +30,6 @@ export const FileGrid = memo(function FileGrid({
   onContextMenu,
   onUpload,
   onNewFolder,
-  onImport,
 }: FileGridProps) {
   const { selectedItems, clearSelection } = useDriveStore();
   const { handleClick, handleDoubleClick } = useFileItemHandlers(onFolderOpen, onFileOpen);
@@ -99,6 +97,9 @@ export const FileGrid = memo(function FileGrid({
               {dragCount}
             </span>
           )}
+          {folder.isFavorite && (
+            <Star size={12} className="absolute top-1 left-1 text-amber-500 fill-amber-500" />
+          )}
           <Folder size={40} strokeWidth={1.5} className="text-[var(--text-secondary)] mb-2" />
           <span className="text-xs text-center truncate w-full text-[var(--text-primary)]">{folder.name}</span>
         </div>
@@ -128,6 +129,9 @@ export const FileGrid = memo(function FileGrid({
               <span className="absolute top-1 right-1 px-1.5 py-0.5 text-[10px] bg-[var(--accent-color)] text-white rounded-full">
                 {dragCount}
               </span>
+            )}
+            {file.isFavorite && (
+              <Star size={12} className="absolute top-1 left-1 text-amber-500 fill-amber-500" />
             )}
             <Icon size={40} strokeWidth={1.5} className="text-[var(--text-secondary)] mb-2" />
             <span className="text-xs text-center truncate w-full text-[var(--text-primary)]">{file.name}</span>

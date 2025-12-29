@@ -40,6 +40,11 @@ export class FilesController {
     return this.filesService.search(user.sub, query || '');
   }
 
+  @Get('favorites')
+  findFavorites(@CurrentUser() user: { sub: string }) {
+    return this.filesService.findFavorites(user.sub);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string, @CurrentUser() user: { sub: string }) {
     return this.filesService.findOne(id, user.sub);
@@ -94,6 +99,14 @@ export class FilesController {
     @CurrentUser() user: { sub: string },
   ) {
     return this.filesService.rename(id, user.sub, dto);
+  }
+
+  @Patch(':id/favorite')
+  toggleFavorite(
+    @Param('id') id: string,
+    @CurrentUser() user: { sub: string },
+  ) {
+    return this.filesService.toggleFavorite(id, user.sub);
   }
 
   @Delete(':id')
