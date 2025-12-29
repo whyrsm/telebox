@@ -6,6 +6,11 @@ interface UseFileItemHandlersOptions {
   folders: FolderItem[];
 }
 
+// Detect if device is mobile/touch-enabled
+const isMobileDevice = () => {
+  return 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+};
+
 export function useFileItemHandlers(
   onFolderOpen: (folder: FolderItem) => void,
   onFileOpen: (file: FileItem) => void,
@@ -13,6 +18,8 @@ export function useFileItemHandlers(
 ) {
   const { toggleSelect, clearSelection, selectedItems, selectAll } = useDriveStore();
   const lastClickedIndexRef = useRef<number | null>(null);
+  const lastTapTimeRef = useRef<number>(0);
+  const lastTapItemRef = useRef<string | null>(null);
 
   // Combined list: folders first, then files
   const allItems = useMemo(() => {
@@ -33,11 +40,49 @@ export function useFileItemHandlers(
   const handleClick = (
     e: React.MouseEvent,
     item: FileItem | FolderItem,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    _type: 'file' | 'folder'
+    type: 'file' | 'folder'
   ) => {
     const currentIndex = getItemIndex(item.id);
+    const isMobile = isMobileDevice();
 
+    // On mobile, implement double-tap to open
+    if (isMobile) {
+      const now = Date.now();
+      const timeSinceLastTap = now - lastTapTimeRef.current;
+      const DOUBLE_TAP_DELAY = 300; // ms
+
+      // Check if this is a double-tap on the same item
+      if (
+        timeSinceLastTap < DOUBLE_TAP_DELAY &&
+        lastTapItemRef.current === item.id
+      ) {
+        // Double-tap detected - open the item
+        e.preventDefault();
+        if (type === 'folder') {
+          onFolderOpen(item as FolderItem);
+        } else {
+          onFileOpen(item as FileItem);
+        }
+        // Reset tap tracking
+        lastTapTimeRef.current = 0;
+        lastTapItemRef.current = null;
+        return;
+      }
+
+      // Single tap - select the item
+      lastTapTimeRef.current = now;
+      lastTapItemRef.current = item.id;
+      
+      // Single tap replaces selection with this item
+      if (selectedItems.size !== 1 || !selectedItems.has(item.id)) {
+        clearSelection();
+        toggleSelect(item.id);
+      }
+      lastClickedIndexRef.current = currentIndex;
+      return;
+    }
+
+    // Desktop behavior
     if (e.shiftKey && lastClickedIndexRef.current !== null && options) {
       // Shift+click: select range from last clicked to current
       e.preventDefault();
@@ -65,7 +110,7 @@ export function useFileItemHandlers(
     item: FileItem | FolderItem,
     type: 'file' | 'folder'
   ) => {
-    // Double click opens folders or files
+    // Double click opens folders or files (desktop only)
     if (type === 'folder') {
       onFolderOpen(item as FolderItem);
     } else {
