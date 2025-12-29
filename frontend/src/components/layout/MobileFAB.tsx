@@ -17,7 +17,7 @@ export function MobileFAB({ onNewFolder, onUpload, onImport }: MobileFABProps) {
   };
 
   return (
-    <div className="md:hidden fixed bottom-20 right-4 z-40">
+    <div className="md:hidden fixed bottom-6 left-0 right-0 z-50 flex flex-col items-center">
       {/* Action buttons */}
       <div
         className={cn(
@@ -27,24 +27,24 @@ export function MobileFAB({ onNewFolder, onUpload, onImport }: MobileFABProps) {
       >
         <button
           onClick={() => handleAction(onNewFolder)}
-          className="flex items-center gap-2 px-4 py-2.5 bg-white rounded-full shadow-lg text-sm font-medium text-[var(--text-primary)] active:bg-[var(--bg-hover)]"
+          className="flex items-center gap-2 px-4 py-2.5 bg-white rounded-full shadow-lg text-sm font-medium text-gray-900 active:bg-gray-100"
         >
-          <FolderPlus size={18} className="text-[var(--text-secondary)]" />
+          <FolderPlus size={18} className="text-gray-600" />
           New Folder
         </button>
         <button
           onClick={() => handleAction(onUpload)}
-          className="flex items-center gap-2 px-4 py-2.5 bg-white rounded-full shadow-lg text-sm font-medium text-[var(--text-primary)] active:bg-[var(--bg-hover)]"
+          className="flex items-center gap-2 px-4 py-2.5 bg-white rounded-full shadow-lg text-sm font-medium text-gray-900 active:bg-gray-100"
         >
-          <Upload size={18} className="text-[var(--text-secondary)]" />
+          <Upload size={18} className="text-gray-600" />
           Upload
         </button>
         {onImport && (
           <button
             onClick={() => handleAction(onImport)}
-            className="flex items-center gap-2 px-4 py-2.5 bg-white rounded-full shadow-lg text-sm font-medium text-[var(--text-primary)] active:bg-[var(--bg-hover)]"
+            className="flex items-center gap-2 px-4 py-2.5 bg-white rounded-full shadow-lg text-sm font-medium text-gray-900 active:bg-gray-100"
           >
-            <Download size={18} className="text-[var(--text-secondary)]" />
+            <Download size={18} className="text-gray-600" />
             Import
           </button>
         )}
@@ -53,17 +53,38 @@ export function MobileFAB({ onNewFolder, onUpload, onImport }: MobileFABProps) {
       {/* Main FAB button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
+        onMouseEnter={(e) => {
+          if (!isOpen) {
+            e.currentTarget.style.opacity = '0.85';
+          }
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.opacity = '1';
+        }}
         className={cn(
-          'w-14 h-14 rounded-full flex items-center justify-center shadow-lg transition-all duration-200',
+          'w-14 h-14 rounded-full flex items-center justify-center transition-all duration-200',
           isOpen
-            ? 'bg-[var(--bg-tertiary)] rotate-45'
-            : 'bg-[var(--text-primary)] text-white'
+            ? 'bg-white rotate-45 shadow-lg'
+            : 'shadow-xl'
         )}
+        style={{ 
+          backgroundColor: isOpen ? '#ffffff' : '#37352f',
+        }}
       >
         {isOpen ? (
-          <X size={24} className="text-[var(--text-primary)]" />
+          <X 
+            size={26} 
+            strokeWidth={2}
+            color="#37352f"
+            className="flex-shrink-0"
+          />
         ) : (
-          <Plus size={24} />
+          <Plus 
+            size={26} 
+            strokeWidth={2}
+            color="#ffffff"
+            className="flex-shrink-0"
+          />
         )}
       </button>
 
