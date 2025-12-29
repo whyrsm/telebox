@@ -4,6 +4,7 @@ import { cn } from '@/lib/utils';
 import { useDriveStore, FolderItem } from '@/stores/drive.store';
 import { useFolderTree } from '@/lib/queries';
 import { NewMenu } from './NewMenu';
+import { StorageIndicator } from './StorageIndicator';
 
 interface FolderTreeItemProps {
   folder: FolderItem;
@@ -127,6 +128,8 @@ export function Sidebar({ onNewFolder, onUpload }: SidebarProps) {
           )}
         </div>
       </nav>
+
+      <StorageIndicator />
     </aside>
   );
 }

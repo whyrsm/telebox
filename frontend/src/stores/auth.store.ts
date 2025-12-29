@@ -8,6 +8,10 @@ interface User {
   firstName: string | null;
   lastName: string | null;
   phone: string | null;
+  storage: {
+    fileCount: number;
+    totalSize: string;
+  };
 }
 
 interface AuthState {
