@@ -20,6 +20,7 @@ interface FileListProps {
   onContextMenu: (e: React.MouseEvent, item: FileItem | FolderItem, type: 'file' | 'folder') => void;
   onUpload?: () => void;
   onNewFolder?: () => void;
+  onImport?: () => void;
 }
 
 export const FileList = memo(function FileList({
@@ -32,6 +33,7 @@ export const FileList = memo(function FileList({
   onContextMenu,
   onUpload,
   onNewFolder,
+  onImport,
 }: FileListProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const { selectedItems, clearSelection, sortField, sortDirection, setSortField, toggleSortDirection } = useDriveStore();
@@ -227,6 +229,7 @@ export const FileList = memo(function FileList({
           isRootFolder={currentFolderId === null}
           onUpload={onUpload || (() => {})}
           onNewFolder={onNewFolder || (() => {})}
+          onImport={onImport}
         />
       )}
 

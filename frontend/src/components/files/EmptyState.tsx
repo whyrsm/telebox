@@ -4,9 +4,10 @@ interface EmptyStateProps {
   isRootFolder: boolean;
   onUpload: () => void;
   onNewFolder: () => void;
+  onImport?: () => void;
 }
 
-export function EmptyState({ isRootFolder, onUpload, onNewFolder }: EmptyStateProps) {
+export function EmptyState({ isRootFolder, onUpload, onNewFolder, onImport }: EmptyStateProps) {
   // Simple empty state for subfolders
   if (!isRootFolder) {
     return (
@@ -59,18 +60,18 @@ export function EmptyState({ isRootFolder, onUpload, onNewFolder }: EmptyStatePr
           </div>
         </button>
 
-        <div className="w-full flex items-center gap-3 p-3 sm:p-4 rounded-lg border border-[var(--border-color)] bg-[var(--bg-secondary)] opacity-60 cursor-not-allowed text-left">
+        <button
+          onClick={onImport}
+          className="w-full flex items-center gap-3 p-3 sm:p-4 rounded-lg border border-[var(--border-color)] hover:bg-[var(--bg-hover)] active:bg-[var(--bg-active)] transition-colors text-left"
+        >
           <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[var(--bg-hover)] flex items-center justify-center flex-shrink-0">
             <Download size={18} strokeWidth={1.5} className="sm:w-5 sm:h-5 text-[var(--text-secondary)]" />
           </div>
-          <div className="flex-1">
-            <div className="flex items-center gap-2">
-              <p className="text-sm font-medium text-[var(--text-primary)]">Import from Telegram</p>
-              <span className="text-[10px] px-1.5 py-0.5 rounded bg-[var(--text-tertiary)] text-white">Coming Soon</span>
-            </div>
+          <div>
+            <p className="text-sm font-medium text-[var(--text-primary)]">Import from Telegram</p>
             <p className="text-xs text-[var(--text-tertiary)]">Bring in files already in your Saved Messages</p>
           </div>
-        </div>
+        </button>
       </div>
 
       <p className="text-xs text-[var(--text-tertiary)] mt-6 text-center">

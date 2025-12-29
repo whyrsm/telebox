@@ -20,6 +20,7 @@ interface FileGridProps {
   onContextMenu: (e: React.MouseEvent, item: FileItem | FolderItem, type: 'file' | 'folder') => void;
   onUpload?: () => void;
   onNewFolder?: () => void;
+  onImport?: () => void;
 }
 
 export const FileGrid = memo(function FileGrid({
@@ -32,6 +33,7 @@ export const FileGrid = memo(function FileGrid({
   onContextMenu,
   onUpload,
   onNewFolder,
+  onImport,
 }: FileGridProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const { selectedItems, clearSelection } = useDriveStore();
@@ -179,6 +181,7 @@ export const FileGrid = memo(function FileGrid({
             isRootFolder={currentFolderId === null}
             onUpload={onUpload || (() => {})}
             onNewFolder={onNewFolder || (() => {})}
+            onImport={onImport}
           />
         </div>
       )}

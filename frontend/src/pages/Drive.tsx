@@ -14,23 +14,27 @@ import { UploadProgress } from '@/components/upload/UploadProgress';
 import { TrashView } from '@/components/files/TrashView';
 import { MobileFAB } from '@/components/layout/MobileFAB';
 import { useDriveStore, FolderItem, FileItem } from '@/stores/drive.store';
+import { useUploadStore } from '@/stores/upload.store';
 import { useFolders, useFiles, useFileSearch, useFavoriteFiles, useFavoriteFolders } from '@/lib/queries';
 import { useDriveActions } from '@/hooks/useDriveActions';
 import { sortItems } from '@/lib/utils';
-import { useState, useCallback, useEffect, useMemo } from 'react';
+import { useState, useCallback, useEffect, useMemo, DragEvent } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useDebouncedCallback } from 'use-debounce';
 import { useParams, useNavigate } from 'react-router-dom';
 import { foldersApi } from '@/lib/api';
-import { Trash2, X } from 'lucide-react';
+import { Trash2, X, Upload } from 'lucide-react';
 
 export function DrivePage() {
   const { folderId } = useParams<{ folderId: string }>();
   const navigate = useNavigate();
   const { currentFolderId, viewMode, searchQuery, setSearchQuery, addToPath, currentView, setCurrentFolder, sortField, sortDirection, selectedItems, clearSelection } = useDriveStore();
+  const { addUploads } = useUploadStore();
   const [showImport, setShowImport] = useState(false);
   const [backgroundContextMenu, setBackgroundContextMenu] = useState<{ x: number; y: number } | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
+  const [isDraggingFiles, setIsDraggingFiles] = useState(false);
+  const [, setDragCounter] = useState(0);
   const queryClient = useQueryClient();
 
   // Sync URL params with store on mount and URL changes
@@ -170,8 +174,56 @@ export function DrivePage() {
     }
   };
 
+  // Global drag and drop file upload handlers
+  const handleGlobalDragEnter = useCallback((e: DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragCounter(prev => prev + 1);
+    if (e.dataTransfer?.types.includes('Files')) {
+      setIsDraggingFiles(true);
+    }
+  }, []);
+
+  const handleGlobalDragLeave = useCallback((e: DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragCounter(prev => {
+      const newCount = prev - 1;
+      if (newCount === 0) {
+        setIsDraggingFiles(false);
+      }
+      return newCount;
+    });
+  }, []);
+
+  const handleGlobalDragOver = useCallback((e: DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.dataTransfer) {
+      e.dataTransfer.dropEffect = 'copy';
+    }
+  }, []);
+
+  const handleGlobalDrop = useCallback((e: DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDraggingFiles(false);
+    setDragCounter(0);
+
+    const files = Array.from(e.dataTransfer?.files || []);
+    if (files.length > 0) {
+      addUploads(files, currentFolderId || undefined);
+    }
+  }, [addUploads, currentFolderId]);
+
   return (
-    <div className="h-screen flex flex-col">
+    <div 
+      className="h-screen flex flex-col relative"
+      onDragEnter={handleGlobalDragEnter}
+      onDragLeave={handleGlobalDragLeave}
+      onDragOver={handleGlobalDragOver}
+      onDrop={handleGlobalDrop}
+    >
       <Header onSearch={handleSearch} />
 
       <div className="flex-1 flex overflow-hidden">
@@ -200,6 +252,7 @@ export function DrivePage() {
                 onContextMenu={handleContextMenu}
                 onUpload={() => setShowUpload(true)}
                 onNewFolder={() => setShowNewFolder(true)}
+                onImport={() => setShowImport(true)}
               />
             ) : (
               <FileList
@@ -212,11 +265,25 @@ export function DrivePage() {
                 onContextMenu={handleContextMenu}
                 onUpload={() => setShowUpload(true)}
                 onNewFolder={() => setShowNewFolder(true)}
+                onImport={() => setShowImport(true)}
               />
             )}
           </div>
         </main>
       </div>
+
+      {/* Global drag and drop overlay */}
+      {isDraggingFiles && (
+        <div className="fixed inset-0 bg-[var(--accent-color)]/10 border-2 border-dashed border-[var(--accent-color)] z-50 pointer-events-none flex items-center justify-center">
+          <div className="bg-[var(--bg-primary)] rounded-lg shadow-lg p-6 flex flex-col items-center gap-3">
+            <div className="w-12 h-12 rounded-full bg-[var(--accent-color)]/10 flex items-center justify-center">
+              <Upload size={24} className="text-[var(--accent-color)]" />
+            </div>
+            <p className="text-sm font-medium text-[var(--text-primary)]">Drop files to upload</p>
+            <p className="text-xs text-[var(--text-tertiary)]">Files will be uploaded to the current folder</p>
+          </div>
+        </div>
+      )}
 
       {contextMenu && (
         <ContextMenu
