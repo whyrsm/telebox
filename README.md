@@ -2,12 +2,15 @@
 
 A privacy-focused cloud storage solution that uses Telegram as the storage backend. Get unlimited file storage with a familiar Google Drive-like interface — your files stay in your own Telegram account.
 
+**Free Forever** — This is a community-driven, open-source project. Not for commercial use.
+
 ## Why Telebox?
 
 - **Unlimited Storage** — Telegram provides unlimited cloud storage (2GB per file, 4GB with Premium)
 - **Privacy First** — Files are stored in your personal Telegram "Saved Messages", not on third-party servers
 - **Zero Storage Costs** — No monthly fees for storage space
 - **Familiar Interface** — Google Drive-like layout with Finder-inspired aesthetics
+- **Community-Driven** — Open source and maintained by the community
 
 ## Features
 
@@ -123,29 +126,11 @@ VITE_API_URL=http://localhost:3000/api
 4. Create a new application
 5. Copy `API_ID` and `API_HASH` to your backend `.env`
 
-## Pricing
-
-### Personal Free
-- Unlimited storage (powered by Telegram)
-- Full file management and organization
-- File preview for all formats
-- Single user only — no sharing
-
-### Personal Plus (Coming Soon)
-**$12/year** (launch discount, regular $20/year)
-- Everything in Free, plus:
-- Import from Telegram chats
-- Private sharing links (password + expiration)
-- Shared folders (up to 10 collaborators)
-
-See [Pricing Model](docs/20251229_pricing_model.md) for details.
-
 ## Documentation
 
 See the `docs/` folder for detailed documentation:
 - [Product Roadmap](docs/20251228_product_roadmap.md)
 - [Project Overview](docs/20251228_project_overview.md)
-- [Pricing Model](docs/20251229_pricing_model.md)
 - [Performance Optimizations](docs/20251228_performance_optimizations.md)
 - [Design Guidelines](docs/design-guidelines.md)
 

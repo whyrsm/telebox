@@ -9,10 +9,12 @@ import {
   Smartphone,
   Menu,
   X,
-  Check,
   Users,
-  Link as LinkIcon,
-  Lock
+  Github,
+  Lock,
+  Heart,
+  Eye,
+  Code2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect } from 'react';
@@ -47,7 +49,6 @@ export function LandingPage() {
 
           <nav className="hidden md:flex items-center gap-8">
             <a href="#features" className="text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors">Features</a>
-            <a href="#pricing" className="text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors">Pricing</a>
             <a href="#how-it-works" className="text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors">How it Works</a>
           </nav>
 
@@ -84,7 +85,6 @@ export function LandingPage() {
           >
             <div className="flex flex-col p-6 gap-4">
               <a href="#features" onClick={() => setMobileMenuOpen(false)} className="text-sm font-medium">Features</a>
-              <a href="#pricing" onClick={() => setMobileMenuOpen(false)} className="text-sm font-medium">Pricing</a>
               <a href="#how-it-works" onClick={() => setMobileMenuOpen(false)} className="text-sm font-medium">How it Works</a>
               <hr className="border-[var(--border-color)]" />
               <Link to="/login" className="text-sm font-medium">Log in</Link>
@@ -112,11 +112,10 @@ export function LandingPage() {
               <span className="text-[var(--text-secondary)]">Private. Simple.</span>
             </h1>
 
-            <p className="text-lg md:text-xl text-[var(--text-secondary)] max-w-2xl mx-auto mb-8 leading-relaxed">
+            <p className="text-lg md:text-xl text-[var(--text-secondary)] max-w-2xl mx-auto mb-4 leading-relaxed">
               Unlimited storage powered by Telegram. <br className="hidden md:block" />
               No more deleting photos or "upgrade for more storage" emails.
             </p>
-
             <div className="flex flex-wrap items-center justify-center gap-4 mb-20">
               <Link
                 to="/login"
@@ -362,115 +361,120 @@ export function LandingPage() {
         </section>
 
 
-        {/* Pricing Section */}
-        <section id="pricing" className="max-w-5xl mx-auto px-6 mb-32">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold tracking-tight mb-4">Simple, transparent pricing</h2>
-            <p className="text-[var(--text-secondary)] max-w-lg mx-auto">
-              Unlimited storage for everyone. Upgrade when you need to share.
-            </p>
-          </div>
+        {/* Open Source Section */}
+        <section className="max-w-6xl mx-auto px-6 mb-32">
+          <div className="bg-[#111] rounded-3xl p-8 md:p-12 relative overflow-hidden text-white border border-[#333]">
+            {/* Ambient Background */}
+            <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-[radial-gradient(circle,rgba(59,130,246,0.15)_0%,transparent_70%)] pointer-events-none -translate-y-1/2 translate-x-1/2" />
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            {/* Free Plan */}
-            <motion.div
-              whileHover={{ y: -4 }}
-              className="bg-white rounded-2xl border border-[var(--border-color)] p-8 shadow-sm hover:shadow-md transition-all flex flex-col"
-            >
-              <div className="mb-6">
-                <h3 className="text-xl font-semibold mb-2">Personal Free</h3>
-                <p className="text-[var(--text-secondary)] text-sm">Perfect for personal use</p>
-              </div>
+            <div className="relative z-10 grid md:grid-cols-2 gap-12 items-center">
+              <div>
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/10 mb-6 backdrop-blur-sm"
+                >
+                  <Github size={14} className="text-white" />
+                  <span className="text-xs font-medium">Open Source</span>
+                </motion.div>
 
-              <div className="mb-6">
-                <span className="text-4xl font-bold">$0</span>
-                <span className="text-[var(--text-secondary)]"> / forever</span>
-              </div>
+                <h2 className="text-3xl md:text-4xl font-bold mb-6 tracking-tight">
+                  Transparent.<br />
+                  <span className="text-white/50">Community Driven.</span>
+                </h2>
 
-              <ul className="space-y-4 mb-8 flex-1">
-                <li className="flex items-start gap-3">
-                  <Check size={20} className="text-green-500 flex-shrink-0 mt-0.5" />
-                  <span className="text-sm">Unlimited storage</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <Check size={20} className="text-green-500 flex-shrink-0 mt-0.5" />
-                  <span className="text-sm">Unlimited files & folders</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <Check size={20} className="text-green-500 flex-shrink-0 mt-0.5" />
-                  <span className="text-sm">File preview (images, videos, docs)</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <Check size={20} className="text-green-500 flex-shrink-0 mt-0.5" />
-                  <span className="text-sm">Drag & drop uploads</span>
-                </li>
-              </ul>
+                <p className="text-gray-400 leading-relaxed mb-8 text-lg">
+                  Aligned with Telegram's mission, Telebox is an open-source project built for user freedom. We provide a fast, secure, and private interface for your cloud files, standing firmly against data selling and commercial surveillance. No targeted ads, no tracking. Just a truly free, unlimited storage experience.
+                </p>
 
-              <Link
-                to="/login"
-                className="w-full bg-black text-white py-3 rounded-lg font-medium text-center hover:bg-neutral-800 transition-colors"
-              >
-                Get Started Free
-              </Link>
-            </motion.div>
-
-            {/* Plus Plan */}
-            <motion.div
-              whileHover={{ y: -4 }}
-              className="bg-white rounded-2xl border-2 border-black p-8 shadow-sm hover:shadow-md transition-all flex flex-col relative"
-            >
-              <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-black text-white text-xs font-medium px-3 py-1 rounded-full">
-                Coming Soon
-              </div>
-
-              <div className="mb-6">
-                <h3 className="text-xl font-semibold mb-2">Personal Plus</h3>
-                <p className="text-[var(--text-secondary)] text-sm">Share & collaborate with others</p>
-              </div>
-
-              <div className="mb-6">
-                <div className="flex items-baseline gap-2">
-                  <span className="text-4xl font-bold">$12</span>
-                  <span className="text-lg text-[var(--text-tertiary)] line-through">$20</span>
-                  <span className="text-[var(--text-secondary)]">/ year</span>
+                <div className="flex flex-col gap-3 mb-8">
+                  <div className="flex items-center gap-3 text-gray-300">
+                    <Shield size={20} className="text-green-400 shrink-0" />
+                    <span className="text-sm">Privacy-first architecture</span>
+                  </div>
+                  <div className="flex items-center gap-3 text-gray-300">
+                    <Users size={20} className="text-blue-400 shrink-0" />
+                    <span className="text-sm">Driven by the community</span>
+                  </div>
+                  <div className="flex items-center gap-3 text-gray-300">
+                    <Lock size={20} className="text-purple-400 shrink-0" />
+                    <span className="text-sm">No ads, no tracking</span>
+                  </div>
                 </div>
-                <span className="text-xs text-green-600 font-medium">40% off launch discount</span>
+
+                <a
+                  href="https://github.com/whyrsm/telebox"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 bg-white text-black px-6 py-3 rounded-lg font-medium hover:bg-gray-200 transition-colors"
+                >
+                  <Github size={20} />
+                  Star on GitHub
+                </a>
               </div>
 
-              <ul className="space-y-4 mb-8 flex-1">
-                <li className="flex items-start gap-3">
-                  <Check size={20} className="text-green-500 flex-shrink-0 mt-0.5" />
-                  <span className="text-sm">Everything in Free, plus:</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <Upload size={20} className="text-black flex-shrink-0 mt-0.5" />
-                  <span className="text-sm">Import from Telegram chats</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <LinkIcon size={20} className="text-black flex-shrink-0 mt-0.5" />
-                  <span className="text-sm">Private sharing links</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <Lock size={20} className="text-black flex-shrink-0 mt-0.5" />
-                  <span className="text-sm">Password protection & expiring links</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <Users size={20} className="text-black flex-shrink-0 mt-0.5" />
-                  <span className="text-sm">Shared folders (up to 10 collaborators)</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <Shield size={20} className="text-black flex-shrink-0 mt-0.5" />
-                  <span className="text-sm">View-only & edit access controls</span>
-                </li>
-              </ul>
-
-              <button
-                disabled
-                className="w-full bg-[var(--bg-tertiary)] text-[var(--text-tertiary)] py-3 rounded-lg font-medium text-center cursor-not-allowed"
+              {/* Right Side Visual - Floating Cards */}
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                className="relative hidden md:flex items-center justify-center min-h-[400px]"
               >
-                Coming Soon
-              </button>
-            </motion.div>
+                {/* Cards Container */}
+                <div className="relative w-full max-w-[400px]">
+
+                  {/* Central Logo/Orb */}
+                  <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-gradient-to-tr from-blue-500/20 to-purple-500/20 rounded-full blur-2xl animate-pulse" />
+
+                  {/* Card 1: Public Code */}
+                  <motion.div
+                    animate={{ y: [0, -10, 0] }}
+                    transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                    className="absolute top-0 right-0 bg-[#222]/90 backdrop-blur-md border border-white/10 p-5 rounded-2xl flex items-center gap-4 shadow-xl z-20 max-w-[200px]"
+                  >
+                    <div className="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-400">
+                      <Code2 size={20} />
+                    </div>
+                    <div>
+                      <div className="text-white font-medium text-sm">Public Code</div>
+                      <div className="text-xs text-gray-400">100% Open Source</div>
+                    </div>
+                  </motion.div>
+
+                  {/* Card 2: Transparent */}
+                  <motion.div
+                    animate={{ y: [0, -12, 0] }}
+                    transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+                    className="absolute top-24 left-0 bg-[#222]/90 backdrop-blur-md border border-white/10 p-5 rounded-2xl flex items-center gap-4 shadow-xl z-10 max-w-[210px]"
+                  >
+                    <div className="w-10 h-10 rounded-full bg-purple-500/20 flex items-center justify-center text-purple-400">
+                      <Eye size={20} />
+                    </div>
+                    <div>
+                      <div className="text-white font-medium text-sm">Fully Transparent</div>
+                      <div className="text-xs text-gray-400">No hidden trackers</div>
+                    </div>
+                  </motion.div>
+
+                  {/* Card 3: Community */}
+                  <motion.div
+                    animate={{ y: [0, -8, 0] }}
+                    transition={{ duration: 6, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
+                    className="absolute bottom-10 right-10 bg-[#222]/90 backdrop-blur-md border border-white/10 p-5 rounded-2xl flex items-center gap-4 shadow-xl z-20 max-w-[220px]"
+                  >
+                    <div className="w-10 h-10 rounded-full bg-pink-500/20 flex items-center justify-center text-pink-400">
+                      <Heart size={20} />
+                    </div>
+                    <div>
+                      <div className="text-white font-medium text-sm">Community Powered</div>
+                      <div className="text-xs text-gray-400">Built for you</div>
+                    </div>
+                  </motion.div>
+
+                </div>
+              </motion.div>
+            </div>
           </div>
         </section>
 
@@ -480,8 +484,11 @@ export function LandingPage() {
             <h2 className="text-3xl font-bold tracking-tight mb-4 text-[var(--text-primary)]">
               Ready to free your files?
             </h2>
-            <p className="text-[var(--text-secondary)] mb-8">
+            <p className="text-[var(--text-secondary)] mb-2">
               No sign-up fees, no storage limits. Just connect and start uploading.
+            </p>
+            <p className="text-sm text-[var(--text-tertiary)] mb-8">
+              Free forever. Community-driven.
             </p>
             <Link
               to="/login"
