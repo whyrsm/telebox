@@ -8,6 +8,7 @@ export interface FileItem {
   messageId: string;
   folderId: string | null;
   isFavorite: boolean;
+  deletedAt: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -17,13 +18,14 @@ export interface FolderItem {
   name: string;
   parentId: string | null;
   isFavorite: boolean;
+  deletedAt: string | null;
   createdAt: string;
   updatedAt: string;
   children?: FolderItem[];
 }
 
 type ViewMode = 'grid' | 'list';
-type DriveView = 'drive' | 'favorites';
+type DriveView = 'drive' | 'favorites' | 'trash';
 
 interface DriveState {
   // Navigation

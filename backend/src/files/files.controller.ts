@@ -45,6 +45,11 @@ export class FilesController {
     return this.filesService.findFavorites(user.sub);
   }
 
+  @Get('trash')
+  findTrashed(@CurrentUser() user: { sub: string }) {
+    return this.filesService.findTrashed(user.sub);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string, @CurrentUser() user: { sub: string }) {
     return this.filesService.findOne(id, user.sub);
@@ -112,5 +117,20 @@ export class FilesController {
   @Delete(':id')
   remove(@Param('id') id: string, @CurrentUser() user: { sub: string }) {
     return this.filesService.remove(id, user.sub);
+  }
+
+  @Patch(':id/restore')
+  restore(@Param('id') id: string, @CurrentUser() user: { sub: string }) {
+    return this.filesService.restore(id, user.sub);
+  }
+
+  @Delete(':id/permanent')
+  permanentDelete(@Param('id') id: string, @CurrentUser() user: { sub: string }) {
+    return this.filesService.permanentDelete(id, user.sub);
+  }
+
+  @Delete('trash/empty')
+  emptyTrash(@CurrentUser() user: { sub: string }) {
+    return this.filesService.emptyTrash(user.sub);
   }
 }

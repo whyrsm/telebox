@@ -37,6 +37,11 @@ export class FoldersController {
     return this.foldersService.findFavorites(user.sub);
   }
 
+  @Get('trash')
+  findTrashed(@CurrentUser() user: { sub: string }) {
+    return this.foldersService.findTrashed(user.sub);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string, @CurrentUser() user: { sub: string }) {
     return this.foldersService.findOne(id, user.sub);
@@ -84,5 +89,15 @@ export class FoldersController {
   @Delete(':id')
   remove(@Param('id') id: string, @CurrentUser() user: { sub: string }) {
     return this.foldersService.remove(id, user.sub);
+  }
+
+  @Patch(':id/restore')
+  restore(@Param('id') id: string, @CurrentUser() user: { sub: string }) {
+    return this.foldersService.restore(id, user.sub);
+  }
+
+  @Delete(':id/permanent')
+  permanentDelete(@Param('id') id: string, @CurrentUser() user: { sub: string }) {
+    return this.foldersService.permanentDelete(id, user.sub);
   }
 }

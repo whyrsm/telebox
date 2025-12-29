@@ -14,6 +14,7 @@ export interface SerializedFile {
   folderId: string | null;
   userId: string;
   isFavorite: boolean;
+  deletedAt: Date | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -31,6 +32,7 @@ export class FilesService {
       where: {
         userId,
         folderId: folderId === undefined ? undefined : folderId,
+        deletedAt: null, // Exclude trashed files
       },
       orderBy: { name: 'asc' },
     });
@@ -43,6 +45,14 @@ export class FilesService {
   }
 
   private async findOneRaw(id: string, userId: string) {
+    const file = await this.prisma.file.findFirst({
+      where: { id, userId, deletedAt: null },
+    });
+    if (!file) throw new NotFoundException('File not found');
+    return file;
+  }
+
+  private async findOneRawIncludingTrashed(id: string, userId: string) {
     const file = await this.prisma.file.findFirst({
       where: { id, userId },
     });
@@ -133,9 +143,43 @@ export class FilesService {
   }
 
   async remove(id: string, userId: string) {
-    const file = await this.findOneRaw(id, userId);
-    const client = await this.authService.getClientForUser(userId);
+    await this.findOneRaw(id, userId);
+    // Soft delete - move to trash
+    const updated = await this.prisma.file.update({
+      where: { id },
+      data: { deletedAt: new Date() },
+    });
+    return this.serializeFile(updated);
+  }
+
+  // Trash methods
+  async findTrashed(userId: string) {
+    const files = await this.prisma.file.findMany({
+      where: { userId, deletedAt: { not: null } },
+      orderBy: { deletedAt: 'desc' },
+    });
+    return files.map(this.serializeFile);
+  }
+
+  async restore(id: string, userId: string) {
+    const file = await this.findOneRawIncludingTrashed(id, userId);
+    if (!file.deletedAt) {
+      throw new NotFoundException('File is not in trash');
+    }
+    const updated = await this.prisma.file.update({
+      where: { id },
+      data: { deletedAt: null },
+    });
+    return this.serializeFile(updated);
+  }
+
+  async permanentDelete(id: string, userId: string) {
+    const file = await this.findOneRawIncludingTrashed(id, userId);
+    if (!file.deletedAt) {
+      throw new NotFoundException('File must be in trash before permanent deletion');
+    }
     
+    const client = await this.authService.getClientForUser(userId);
     try {
       await this.telegramService.deleteMessage(client, Number(file.messageId));
       await this.prisma.file.delete({ where: { id } });
@@ -145,10 +189,42 @@ export class FilesService {
     }
   }
 
+  async emptyTrash(userId: string) {
+    const trashedFiles = await this.prisma.file.findMany({
+      where: { userId, deletedAt: { not: null } },
+    });
+
+    if (trashedFiles.length === 0) {
+      return { count: 0 };
+    }
+
+    const client = await this.authService.getClientForUser(userId);
+    try {
+      // Delete from Telegram
+      for (const file of trashedFiles) {
+        try {
+          await this.telegramService.deleteMessage(client, Number(file.messageId));
+        } catch {
+          // Continue even if Telegram delete fails
+        }
+      }
+      
+      // Delete from database
+      await this.prisma.file.deleteMany({
+        where: { userId, deletedAt: { not: null } },
+      });
+      
+      return { count: trashedFiles.length };
+    } finally {
+      await client.disconnect();
+    }
+  }
+
   async search(userId: string, query: string) {
     const files = await this.prisma.file.findMany({
       where: {
         userId,
+        deletedAt: null,
         name: { contains: query, mode: 'insensitive' },
       },
       orderBy: { name: 'asc' },
@@ -158,7 +234,7 @@ export class FilesService {
 
   async findFavorites(userId: string) {
     const files = await this.prisma.file.findMany({
-      where: { userId, isFavorite: true },
+      where: { userId, isFavorite: true, deletedAt: null },
       orderBy: { name: 'asc' },
     });
     return files.map(this.serializeFile);

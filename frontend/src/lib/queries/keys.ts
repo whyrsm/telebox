@@ -13,6 +13,7 @@ export const queryKeys = {
     tree: () => [...queryKeys.folders.all, 'tree'] as const,
     detail: (id: string) => [...queryKeys.folders.all, 'detail', id] as const,
     favorites: () => [...queryKeys.folders.all, 'favorites'] as const,
+    trash: () => [...queryKeys.folders.all, 'trash'] as const,
   },
 
   // Files
@@ -22,5 +23,6 @@ export const queryKeys = {
     detail: (id: string) => [...queryKeys.files.all, 'detail', id] as const,
     search: (query: string) => [...queryKeys.files.all, 'search', query] as const,
     favorites: () => [...queryKeys.files.all, 'favorites'] as const,
+    trash: () => [...queryKeys.files.all, 'trash'] as const,
   },
 };

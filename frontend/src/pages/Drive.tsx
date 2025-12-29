@@ -11,6 +11,7 @@ import { DeleteConfirmModal } from '@/components/modals/DeleteConfirmModal';
 import { FilePreviewModal } from '@/components/modals/FilePreviewModal';
 import ImportModal from '@/components/modals/ImportModal';
 import { UploadProgress } from '@/components/upload/UploadProgress';
+import { TrashView } from '@/components/files/TrashView';
 import { useDriveStore, FolderItem, FileItem } from '@/stores/drive.store';
 import { useFolders, useFiles, useFileSearch, useFavoriteFiles, useFavoriteFolders } from '@/lib/queries';
 import { useDriveActions } from '@/hooks/useDriveActions';
@@ -118,7 +119,9 @@ export function DrivePage() {
           <Breadcrumb />
 
           <div className="flex-1 overflow-auto" onContextMenu={handleBackgroundContextMenu}>
-            {viewMode === 'grid' ? (
+            {currentView === 'trash' ? (
+              <TrashView />
+            ) : viewMode === 'grid' ? (
               <FileGrid
                 files={displayFiles}
                 folders={displayFolders}

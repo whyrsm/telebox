@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { ChevronRight, ChevronDown, Folder, HardDrive, Loader2, Star } from 'lucide-react';
+import { ChevronRight, ChevronDown, Folder, HardDrive, Loader2, Star, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useDriveStore, FolderItem } from '@/stores/drive.store';
-import { useFolderTree, useFavoriteFolders, useFavoriteFiles } from '@/lib/queries';
+import { useFolderTree, useFavoriteFolders, useFavoriteFiles, useTrashedFiles, useTrashedFolders } from '@/lib/queries';
 import { NewMenu } from './NewMenu';
 import { StorageIndicator } from './StorageIndicator';
 import { ContextMenu } from '../files/ContextMenu';
@@ -91,9 +91,12 @@ export function Sidebar({ onNewFolder, onUpload, onRenameFolder, onDeleteFolder 
   const { data: folderTree = [], isLoading } = useFolderTree();
   const { data: favoriteFolders = [] } = useFavoriteFolders();
   const { data: favoriteFiles = [] } = useFavoriteFiles();
+  const { data: trashedFiles = [] } = useTrashedFiles();
+  const { data: trashedFolders = [] } = useTrashedFolders();
   const [contextMenu, setContextMenu] = useState<SidebarContextMenu | null>(null);
 
   const hasFavorites = favoriteFolders.length > 0 || favoriteFiles.length > 0;
+  const hasTrash = trashedFiles.length > 0 || trashedFolders.length > 0;
 
   const handleSelectFolder = (folder: FolderItem, path: FolderItem[]) => {
     setCurrentFolder(folder.id, path);
@@ -105,6 +108,10 @@ export function Sidebar({ onNewFolder, onUpload, onRenameFolder, onDeleteFolder 
 
   const handleGoToFavorites = () => {
     setCurrentView('favorites');
+  };
+
+  const handleGoToTrash = () => {
+    setCurrentView('trash');
   };
 
   const handleFolderContextMenu = (e: React.MouseEvent, folder: FolderItem) => {
@@ -199,6 +206,18 @@ export function Sidebar({ onNewFolder, onUpload, onRenameFolder, onDeleteFolder 
             <span className="text-sm font-medium text-[var(--text-primary)]">Favorites</span>
           </div>
         )}
+
+        <div
+          className={cn(
+            'flex items-center gap-2 px-2 py-1.5 cursor-pointer rounded transition-colors mt-1',
+            'hover:bg-[var(--bg-hover)]',
+            currentView === 'trash' && 'bg-[var(--selected-bg)]'
+          )}
+          onClick={handleGoToTrash}
+        >
+          <Trash2 size={14} strokeWidth={2} className={hasTrash ? 'text-red-500' : 'text-[var(--text-secondary)]'} />
+          <span className="text-sm font-medium text-[var(--text-primary)]">Trash</span>
+        </div>
       </nav>
 
       <StorageIndicator />

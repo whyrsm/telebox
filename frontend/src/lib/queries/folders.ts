@@ -90,6 +90,7 @@ export function useDeleteFolder() {
       // Only invalidate the specific parent folder's list and tree
       queryClient.invalidateQueries({ queryKey: queryKeys.folders.list(parentId) });
       queryClient.invalidateQueries({ queryKey: queryKeys.folders.tree() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.folders.trash() });
     },
   });
 }
@@ -99,6 +100,16 @@ export function useFavoriteFolders() {
     queryKey: queryKeys.folders.favorites(),
     queryFn: async () => {
       const { data } = await foldersApi.favorites();
+      return data as FolderItem[];
+    },
+  });
+}
+
+export function useTrashedFolders() {
+  return useQuery({
+    queryKey: queryKeys.folders.trash(),
+    queryFn: async () => {
+      const { data } = await foldersApi.trash();
       return data as FolderItem[];
     },
   });
@@ -114,6 +125,30 @@ export function useToggleFolderFavorite() {
       queryClient.invalidateQueries({ queryKey: queryKeys.folders.list(parentId) });
       queryClient.invalidateQueries({ queryKey: queryKeys.folders.favorites() });
       queryClient.invalidateQueries({ queryKey: queryKeys.folders.tree() });
+    },
+  });
+}
+
+export function useRestoreFolder() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) => foldersApi.restore(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.folders.trash() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.folders.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.files.trash() });
+    },
+  });
+}
+
+export function usePermanentDeleteFolder() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) => foldersApi.permanentDelete(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.folders.trash() });
     },
   });
 }

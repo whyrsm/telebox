@@ -16,6 +16,7 @@ export class FoldersService {
       where: {
         userId,
         parentId: parentId === undefined ? undefined : parentId,
+        deletedAt: null,
       },
       orderBy: { name: 'asc' },
     });
@@ -23,8 +24,16 @@ export class FoldersService {
 
   async findOne(id: string, userId: string) {
     const folder = await this.prisma.folder.findFirst({
-      where: { id, userId },
+      where: { id, userId, deletedAt: null },
       include: { children: true, files: true },
+    });
+    if (!folder) throw new NotFoundException('Folder not found');
+    return folder;
+  }
+
+  private async findOneIncludingTrashed(id: string, userId: string) {
+    const folder = await this.prisma.folder.findFirst({
+      where: { id, userId },
     });
     if (!folder) throw new NotFoundException('Folder not found');
     return folder;
@@ -87,12 +96,23 @@ export class FoldersService {
 
   async remove(id: string, userId: string) {
     await this.findOne(id, userId);
-    return this.prisma.folder.delete({ where: { id } });
+    // Soft delete - move to trash (also soft delete all files in folder)
+    await this.prisma.$transaction([
+      this.prisma.file.updateMany({
+        where: { folderId: id, userId },
+        data: { deletedAt: new Date() },
+      }),
+      this.prisma.folder.update({
+        where: { id },
+        data: { deletedAt: new Date() },
+      }),
+    ]);
+    return { success: true };
   }
 
   async getFolderTree(userId: string): Promise<FolderWithChildren[]> {
     const folders = await this.prisma.folder.findMany({
-      where: { userId },
+      where: { userId, deletedAt: null },
       orderBy: { name: 'asc' },
     });
     return this.buildTree(folders);
@@ -100,9 +120,46 @@ export class FoldersService {
 
   async findFavorites(userId: string) {
     return this.prisma.folder.findMany({
-      where: { userId, isFavorite: true },
+      where: { userId, isFavorite: true, deletedAt: null },
       orderBy: { name: 'asc' },
     });
+  }
+
+  // Trash methods
+  async findTrashed(userId: string) {
+    return this.prisma.folder.findMany({
+      where: { userId, deletedAt: { not: null } },
+      orderBy: { deletedAt: 'desc' },
+    });
+  }
+
+  async restore(id: string, userId: string) {
+    const folder = await this.findOneIncludingTrashed(id, userId);
+    if (!folder.deletedAt) {
+      throw new NotFoundException('Folder is not in trash');
+    }
+    // Restore folder and its files
+    await this.prisma.$transaction([
+      this.prisma.file.updateMany({
+        where: { folderId: id, userId, deletedAt: { not: null } },
+        data: { deletedAt: null },
+      }),
+      this.prisma.folder.update({
+        where: { id },
+        data: { deletedAt: null },
+      }),
+    ]);
+    return { success: true };
+  }
+
+  async permanentDelete(id: string, userId: string) {
+    const folder = await this.findOneIncludingTrashed(id, userId);
+    if (!folder.deletedAt) {
+      throw new NotFoundException('Folder must be in trash before permanent deletion');
+    }
+    // Cascade delete will handle files
+    await this.prisma.folder.delete({ where: { id } });
+    return { success: true };
   }
 
   async toggleFavorite(id: string, userId: string) {

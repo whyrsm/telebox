@@ -105,8 +105,8 @@ export function useDeleteFile() {
   return useMutation({
     mutationFn: ({ id }: { id: string; folderId?: string | null }) => filesApi.delete(id),
     onSuccess: (_, { folderId }) => {
-      // Only invalidate the specific folder's file list
       queryClient.invalidateQueries({ queryKey: queryKeys.files.list(folderId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.files.trash() });
     },
   });
 }
@@ -121,6 +121,16 @@ export function useFavoriteFiles() {
   });
 }
 
+export function useTrashedFiles() {
+  return useQuery({
+    queryKey: queryKeys.files.trash(),
+    queryFn: async () => {
+      const { data } = await filesApi.trash();
+      return data as FileItem[];
+    },
+  });
+}
+
 export function useToggleFileFavorite() {
   const queryClient = useQueryClient();
 
@@ -130,6 +140,41 @@ export function useToggleFileFavorite() {
     onSuccess: (_, { folderId }) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.files.list(folderId) });
       queryClient.invalidateQueries({ queryKey: queryKeys.files.favorites() });
+    },
+  });
+}
+
+export function useRestoreFile() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) => filesApi.restore(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.files.trash() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.files.all });
+    },
+  });
+}
+
+export function usePermanentDeleteFile() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) => filesApi.permanentDelete(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.files.trash() });
+    },
+  });
+}
+
+export function useEmptyTrash() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: () => filesApi.emptyTrash(),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.files.trash() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.folders.trash() });
     },
   });
 }
