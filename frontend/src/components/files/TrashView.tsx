@@ -145,28 +145,33 @@ export function TrashView() {
 
       {/* Empty trash confirmation modal */}
       {showEmptyConfirm && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-[var(--bg-primary)] rounded-lg p-6 max-w-md w-full mx-4 shadow-xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/50" onClick={() => setShowEmptyConfirm(false)} />
+          
+          <div className="relative bg-white rounded-lg p-6 w-full max-w-md mx-4 shadow-xl">
             <div className="flex items-center gap-3 mb-4">
               <div className="p-2 bg-red-500/10 rounded-full">
                 <AlertTriangle size={24} className="text-red-500" />
               </div>
               <h3 className="text-lg font-semibold text-[var(--text-primary)]">Empty trash?</h3>
             </div>
+            
             <p className="text-[var(--text-secondary)] mb-6">
               All {trashedFolders.length + trashedFiles.length} items in trash will be permanently deleted. 
               This action cannot be undone.
             </p>
-            <div className="flex justify-end gap-3">
+
+            <div className="flex gap-3 justify-end">
               <button
                 onClick={() => setShowEmptyConfirm(false)}
-                className="px-4 py-2 text-sm text-[var(--text-primary)] hover:bg-[var(--bg-hover)] rounded transition-colors"
+                className="px-4 py-2 text-sm font-medium text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] rounded-lg transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={handleEmptyTrash}
-                className="px-4 py-2 text-sm bg-red-500 text-white hover:bg-red-600 rounded transition-colors"
+                className="px-4 py-2 rounded-lg hover:opacity-90 transition-opacity"
+                style={{ backgroundColor: '#dc2626', color: '#ffffff', fontSize: '0.875rem', fontWeight: '500' }}
               >
                 Empty trash
               </button>
