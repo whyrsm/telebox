@@ -1,5 +1,10 @@
 @import "tailwindcss";
 
+/* Custom breakpoints */
+@theme {
+  --breakpoint-xs: 480px;
+}
+
 :root {
   /* Backgrounds */
   --bg-primary: #ffffff;

@@ -23,32 +23,32 @@ function TrashItem({ item, type, isSelected, onSelect, onRestore, onPermanentDel
   return (
     <div
       className={cn(
-        'flex items-center gap-3 px-4 py-2 hover:bg-[var(--bg-hover)] cursor-pointer border-b border-[var(--border-color)]',
+        'flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2.5 sm:py-2 hover:bg-[var(--bg-hover)] active:bg-[var(--bg-active)] cursor-pointer border-b border-[var(--border-color)]',
         isSelected && 'bg-[var(--selected-bg)]'
       )}
       onClick={onSelect}
     >
       <div className="flex-shrink-0">
-        <Icon size={20} className="text-[var(--text-secondary)]" />
+        <Icon size={18} className="sm:w-5 sm:h-5 text-[var(--text-secondary)]" />
       </div>
       <div className="flex-1 min-w-0">
         <p className="text-sm text-[var(--text-primary)] truncate">{item.name}</p>
         <p className="text-xs text-[var(--text-tertiary)]">
-          {isFile && `${formatFileSize(fileItem.size)} • `}
+          {isFile && <span className="hidden sm:inline">{formatFileSize(fileItem.size)} • </span>}
           Deleted {formatDate(item.updatedAt)}
         </p>
       </div>
-      <div className="flex items-center gap-1">
+      <div className="flex items-center gap-0.5 sm:gap-1">
         <button
           onClick={(e) => { e.stopPropagation(); onRestore(); }}
-          className="p-1.5 rounded hover:bg-[var(--bg-active)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+          className="p-2 sm:p-1.5 rounded hover:bg-[var(--bg-active)] active:bg-[var(--bg-tertiary)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
           title="Restore"
         >
           <RotateCcw size={16} />
         </button>
         <button
           onClick={(e) => { e.stopPropagation(); onPermanentDelete(); }}
-          className="p-1.5 rounded hover:bg-red-500/10 text-[var(--text-secondary)] hover:text-red-500"
+          className="p-2 sm:p-1.5 rounded hover:bg-red-500/10 active:bg-red-500/20 text-[var(--text-secondary)] hover:text-red-500"
           title="Delete permanently"
         >
           <Trash2 size={16} />
@@ -89,10 +89,10 @@ export function TrashView() {
 
   if (isEmpty) {
     return (
-      <div className="flex flex-col items-center justify-center h-full text-[var(--text-tertiary)]">
-        <Trash2 size={48} strokeWidth={1.5} className="mb-4" />
-        <p className="text-lg font-medium">Trash is empty</p>
-        <p className="text-sm mt-1">Items you delete will appear here</p>
+      <div className="flex flex-col items-center justify-center h-full text-[var(--text-tertiary)] px-4">
+        <Trash2 size={40} strokeWidth={1.5} className="sm:w-12 sm:h-12 mb-4" />
+        <p className="text-base sm:text-lg font-medium">Trash is empty</p>
+        <p className="text-sm mt-1 text-center">Items you delete will appear here</p>
       </div>
     );
   }
@@ -100,18 +100,18 @@ export function TrashView() {
   return (
     <div className="h-full flex flex-col">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--border-color)]">
+      <div className="flex items-center justify-between px-3 sm:px-4 py-2.5 sm:py-3 border-b border-[var(--border-color)]">
         <div className="flex items-center gap-2">
-          <Trash2 size={20} className="text-red-500" />
+          <Trash2 size={18} className="sm:w-5 sm:h-5 text-red-500" />
           <span className="font-medium text-[var(--text-primary)]">Trash</span>
-          <span className="text-sm text-[var(--text-tertiary)]">
-            ({trashedFolders.length + trashedFiles.length} items)
+          <span className="text-xs sm:text-sm text-[var(--text-tertiary)]">
+            ({trashedFolders.length + trashedFiles.length})
           </span>
         </div>
         <button
           onClick={() => setShowEmptyConfirm(true)}
           disabled={isEmptying}
-          className="px-3 py-1.5 text-sm text-red-500 hover:bg-red-500/10 rounded transition-colors disabled:opacity-50"
+          className="px-2.5 sm:px-3 py-1.5 text-xs sm:text-sm text-red-500 hover:bg-red-500/10 active:bg-red-500/20 rounded transition-colors disabled:opacity-50"
         >
           {isEmptying ? 'Emptying...' : 'Empty trash'}
         </button>

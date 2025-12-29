@@ -10,9 +10,9 @@ export function EmptyState({ isRootFolder, onUpload, onNewFolder }: EmptyStatePr
   // Simple empty state for subfolders
   if (!isRootFolder) {
     return (
-      <div className="flex flex-col items-center justify-center py-16 text-[var(--text-tertiary)]">
-        <div className="w-16 h-16 rounded-full bg-[var(--bg-hover)] flex items-center justify-center mb-4">
-          <Upload size={24} strokeWidth={1.5} />
+      <div className="flex flex-col items-center justify-center py-12 sm:py-16 text-[var(--text-tertiary)]">
+        <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-[var(--bg-hover)] flex items-center justify-center mb-4">
+          <Upload size={22} strokeWidth={1.5} className="sm:w-6 sm:h-6" />
         </div>
         <p className="text-sm mb-1">This folder is empty</p>
         <p className="text-xs">Drop files here or use the + New button</p>
@@ -22,9 +22,9 @@ export function EmptyState({ isRootFolder, onUpload, onNewFolder }: EmptyStatePr
 
   // Onboarding empty state for root folder (first-time users)
   return (
-    <div className="flex flex-col items-center justify-center py-12 px-4 max-w-lg mx-auto">
-      <div className="text-center mb-8">
-        <h2 className="text-xl font-medium text-[var(--text-primary)] mb-2">
+    <div className="flex flex-col items-center justify-center py-8 sm:py-12 px-4 max-w-lg mx-auto">
+      <div className="text-center mb-6 sm:mb-8">
+        <h2 className="text-lg sm:text-xl font-medium text-[var(--text-primary)] mb-2">
           Welcome to Telebox
         </h2>
         <p className="text-sm text-[var(--text-secondary)]">
@@ -35,10 +35,10 @@ export function EmptyState({ isRootFolder, onUpload, onNewFolder }: EmptyStatePr
       <div className="w-full space-y-3">
         <button
           onClick={onUpload}
-          className="w-full flex items-center gap-3 p-4 rounded-lg border border-[var(--border-color)] hover:bg-[var(--bg-hover)] transition-colors text-left"
+          className="w-full flex items-center gap-3 p-3 sm:p-4 rounded-lg border border-[var(--border-color)] hover:bg-[var(--bg-hover)] active:bg-[var(--bg-active)] transition-colors text-left"
         >
-          <div className="w-10 h-10 rounded-full bg-[var(--accent-color)] bg-opacity-10 flex items-center justify-center flex-shrink-0">
-            <Upload size={20} strokeWidth={1.5} className="text-[var(--accent-color)]" />
+          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[var(--accent-color)] bg-opacity-10 flex items-center justify-center flex-shrink-0">
+            <Upload size={18} strokeWidth={1.5} className="sm:w-5 sm:h-5 text-[var(--accent-color)]" />
           </div>
           <div>
             <p className="text-sm font-medium text-[var(--text-primary)]">Upload files</p>
@@ -48,10 +48,10 @@ export function EmptyState({ isRootFolder, onUpload, onNewFolder }: EmptyStatePr
 
         <button
           onClick={onNewFolder}
-          className="w-full flex items-center gap-3 p-4 rounded-lg border border-[var(--border-color)] hover:bg-[var(--bg-hover)] transition-colors text-left"
+          className="w-full flex items-center gap-3 p-3 sm:p-4 rounded-lg border border-[var(--border-color)] hover:bg-[var(--bg-hover)] active:bg-[var(--bg-active)] transition-colors text-left"
         >
-          <div className="w-10 h-10 rounded-full bg-[var(--bg-hover)] flex items-center justify-center flex-shrink-0">
-            <FolderPlus size={20} strokeWidth={1.5} className="text-[var(--text-secondary)]" />
+          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[var(--bg-hover)] flex items-center justify-center flex-shrink-0">
+            <FolderPlus size={18} strokeWidth={1.5} className="sm:w-5 sm:h-5 text-[var(--text-secondary)]" />
           </div>
           <div>
             <p className="text-sm font-medium text-[var(--text-primary)]">Create a folder</p>
@@ -59,9 +59,9 @@ export function EmptyState({ isRootFolder, onUpload, onNewFolder }: EmptyStatePr
           </div>
         </button>
 
-        <div className="w-full flex items-center gap-3 p-4 rounded-lg border border-[var(--border-color)] bg-[var(--bg-secondary)] opacity-60 cursor-not-allowed text-left">
-          <div className="w-10 h-10 rounded-full bg-[var(--bg-hover)] flex items-center justify-center flex-shrink-0">
-            <Download size={20} strokeWidth={1.5} className="text-[var(--text-secondary)]" />
+        <div className="w-full flex items-center gap-3 p-3 sm:p-4 rounded-lg border border-[var(--border-color)] bg-[var(--bg-secondary)] opacity-60 cursor-not-allowed text-left">
+          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[var(--bg-hover)] flex items-center justify-center flex-shrink-0">
+            <Download size={18} strokeWidth={1.5} className="sm:w-5 sm:h-5 text-[var(--text-secondary)]" />
           </div>
           <div className="flex-1">
             <div className="flex items-center gap-2">

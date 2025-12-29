@@ -71,7 +71,7 @@ export const FileList = memo(function FileList({
       onDragOver={handleBackgroundDragOver}
       onDrop={handleDropOnBackground}
     >
-      <div className="grid grid-cols-[1fr_80px_100px] gap-4 px-4 py-2 text-xs font-medium text-[var(--text-tertiary)] border-b border-[var(--border-color)]">
+      <div className="hidden sm:grid grid-cols-[1fr_80px_100px] gap-4 px-4 py-2 text-xs font-medium text-[var(--text-tertiary)] border-b border-[var(--border-color)]">
         <span>Name</span>
         <span>Size</span>
         <span>Modified</span>
@@ -83,8 +83,8 @@ export const FileList = memo(function FileList({
           data-folder-item
           draggable
           className={cn(
-            'grid grid-cols-[1fr_80px_100px] gap-4 px-4 py-2 cursor-pointer transition-all duration-200',
-            'hover:bg-[var(--bg-hover)]',
+            'grid grid-cols-[1fr_auto] sm:grid-cols-[1fr_80px_100px] gap-2 sm:gap-4 px-3 sm:px-4 py-2.5 sm:py-2 cursor-pointer transition-all duration-200',
+            'hover:bg-[var(--bg-hover)] active:bg-[var(--bg-active)]',
             selectedItems.has(folder.id) && 'bg-[var(--selected-bg)]',
             dropTargetId === folder.id && 'ring-2 ring-[var(--accent-color)] bg-[var(--bg-hover)]',
             successFlashId === folder.id && 'animate-success-flash'
@@ -110,8 +110,8 @@ export const FileList = memo(function FileList({
               </span>
             )}
           </div>
-          <span className="text-sm text-[var(--text-tertiary)]">—</span>
-          <span className="text-sm text-[var(--text-tertiary)]">
+          <span className="hidden sm:block text-sm text-[var(--text-tertiary)]">—</span>
+          <span className="text-xs sm:text-sm text-[var(--text-tertiary)]">
             {formatDate(folder.updatedAt)}
           </span>
         </div>
@@ -127,8 +127,8 @@ export const FileList = memo(function FileList({
             data-file-item
             draggable
             className={cn(
-              'grid grid-cols-[1fr_80px_100px] gap-4 px-4 py-2 cursor-pointer transition-colors',
-              'hover:bg-[var(--bg-hover)]',
+              'grid grid-cols-[1fr_auto] sm:grid-cols-[1fr_80px_100px] gap-2 sm:gap-4 px-3 sm:px-4 py-2.5 sm:py-2 cursor-pointer transition-colors',
+              'hover:bg-[var(--bg-hover)] active:bg-[var(--bg-active)]',
               selectedItems.has(file.id) && 'bg-[var(--selected-bg)]'
             )}
             onClick={(e) => handleClick(e, file, 'file')}
@@ -149,10 +149,10 @@ export const FileList = memo(function FileList({
                 </span>
               )}
             </div>
-            <span className="text-sm text-[var(--text-tertiary)]">
+            <span className="text-xs sm:text-sm text-[var(--text-tertiary)] sm:block">
               {formatFileSize(file.size)}
             </span>
-            <span className="text-sm text-[var(--text-tertiary)]">
+            <span className="hidden sm:block text-sm text-[var(--text-tertiary)]">
               {formatDate(file.updatedAt)}
             </span>
           </div>

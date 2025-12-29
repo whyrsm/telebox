@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { ChevronRight, ChevronDown, Folder, HardDrive, Loader2, Star, Trash2 } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { ChevronRight, ChevronDown, Folder, HardDrive, Loader2, Star, Trash2, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useDriveStore, FolderItem } from '@/stores/drive.store';
 import { useFolderTree, useFavoriteFolders, useFavoriteFiles, useTrashedFiles, useTrashedFolders } from '@/lib/queries';
@@ -87,7 +87,7 @@ interface SidebarContextMenu {
 }
 
 export function Sidebar({ onNewFolder, onUpload, onRenameFolder, onDeleteFolder }: SidebarProps) {
-  const { setCurrentFolder, setCurrentView, currentFolderId, currentView } = useDriveStore();
+  const { setCurrentFolder, setCurrentView, currentFolderId, currentView, sidebarOpen, setSidebarOpen } = useDriveStore();
   const { data: folderTree = [], isLoading } = useFolderTree();
   const { data: favoriteFolders = [] } = useFavoriteFolders();
   const { data: favoriteFiles = [] } = useFavoriteFiles();
@@ -98,20 +98,42 @@ export function Sidebar({ onNewFolder, onUpload, onRenameFolder, onDeleteFolder 
   const hasFavorites = favoriteFolders.length > 0 || favoriteFiles.length > 0;
   const hasTrash = trashedFiles.length > 0 || trashedFolders.length > 0;
 
+  // Close sidebar on navigation (mobile)
+  const closeSidebarOnMobile = () => {
+    if (window.innerWidth < 768) {
+      setSidebarOpen(false);
+    }
+  };
+
+  // Close sidebar when pressing Escape
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && sidebarOpen) {
+        setSidebarOpen(false);
+      }
+    };
+    window.addEventListener('keydown', handleEscape);
+    return () => window.removeEventListener('keydown', handleEscape);
+  }, [sidebarOpen, setSidebarOpen]);
+
   const handleSelectFolder = (folder: FolderItem, path: FolderItem[]) => {
     setCurrentFolder(folder.id, path);
+    closeSidebarOnMobile();
   };
 
   const handleGoToRoot = () => {
     setCurrentFolder(null, []);
+    closeSidebarOnMobile();
   };
 
   const handleGoToFavorites = () => {
     setCurrentView('favorites');
+    closeSidebarOnMobile();
   };
 
   const handleGoToTrash = () => {
     setCurrentView('trash');
+    closeSidebarOnMobile();
   };
 
   const handleFolderContextMenu = (e: React.MouseEvent, folder: FolderItem) => {
@@ -142,12 +164,12 @@ export function Sidebar({ onNewFolder, onUpload, onRenameFolder, onDeleteFolder 
     setContextMenu(null);
   };
 
-  return (
-    <aside className="w-60 bg-[var(--bg-secondary)] flex flex-col h-full">
+  const sidebarContent = (
+    <>
       <div className="p-2">
         <NewMenu 
-          onNewFolder={onNewFolder}
-          onUpload={onUpload}
+          onNewFolder={() => { onNewFolder(); closeSidebarOnMobile(); }}
+          onUpload={() => { onUpload(); closeSidebarOnMobile(); }}
         />
       </div>
 
@@ -241,6 +263,44 @@ export function Sidebar({ onNewFolder, onUpload, onRenameFolder, onDeleteFolder 
           }}
         />
       )}
-    </aside>
+    </>
+  );
+
+  return (
+    <>
+      {/* Desktop sidebar */}
+      <aside className="hidden md:flex w-60 bg-[var(--bg-secondary)] flex-col h-full">
+        {sidebarContent}
+      </aside>
+
+      {/* Mobile sidebar overlay */}
+      {sidebarOpen && (
+        <div 
+          className="md:hidden fixed inset-0 bg-black/50 z-40"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      {/* Mobile sidebar drawer */}
+      <aside 
+        className={cn(
+          'md:hidden fixed top-0 left-0 bottom-0 w-72 bg-[var(--bg-secondary)] flex flex-col z-50',
+          'transform transition-transform duration-200 ease-out',
+          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        )}
+      >
+        {/* Mobile header */}
+        <div className="flex items-center justify-between p-3 border-b border-[var(--border-color)]">
+          <span className="font-medium text-[var(--text-primary)]">Telebox</span>
+          <button
+            onClick={() => setSidebarOpen(false)}
+            className="p-1.5 hover:bg-[var(--bg-hover)] rounded transition-colors text-[var(--text-secondary)]"
+          >
+            <X size={18} strokeWidth={2} />
+          </button>
+        </div>
+        {sidebarContent}
+      </aside>
+    </>
   );
 }

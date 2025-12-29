@@ -191,11 +191,11 @@ export function FilePreviewModal({ file, allFiles, onClose, onDownload }: FilePr
       onClick={onClose}
     >
       <div
-        className="relative w-full h-full max-w-6xl max-h-[90vh] m-4 bg-white rounded-lg flex flex-col animate-slideUp shadow-[0_0_0_1px_rgba(15,15,15,0.05),0_3px_6px_rgba(15,15,15,0.1),0_9px_24px_rgba(15,15,15,0.2)]"
+        className="relative w-full h-full sm:max-w-6xl sm:max-h-[90vh] sm:m-4 bg-white sm:rounded-lg flex flex-col animate-slideUp shadow-[0_0_0_1px_rgba(15,15,15,0.05),0_3px_6px_rgba(15,15,15,0.1),0_9px_24px_rgba(15,15,15,0.2)]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--border-color)]">
+        <div className="flex items-center justify-between px-3 sm:px-4 py-3 border-b border-[var(--border-color)]">
           <div className="flex-1 min-w-0">
             <h2 className="text-sm font-medium truncate text-[var(--text-primary)]">{file.name}</h2>
             <p className="text-xs text-[var(--text-tertiary)]">
@@ -233,9 +233,9 @@ export function FilePreviewModal({ file, allFiles, onClose, onDownload }: FilePr
               onClick={navigatePrev}
               disabled={!hasPrev}
               className={cn(
-                'absolute left-4 top-1/2 -translate-y-1/2 p-2 bg-white rounded-full transition-all',
+                'absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 p-2 bg-white rounded-full transition-all',
                 'shadow-[0_0_0_1px_rgba(15,15,15,0.05),0_3px_6px_rgba(15,15,15,0.1)]',
-                'hover:bg-[var(--bg-hover)]',
+                'hover:bg-[var(--bg-hover)] active:bg-[var(--bg-active)]',
                 !hasPrev && 'opacity-40 cursor-not-allowed'
               )}
               title="Previous (←)"
@@ -246,9 +246,9 @@ export function FilePreviewModal({ file, allFiles, onClose, onDownload }: FilePr
               onClick={navigateNext}
               disabled={!hasNext}
               className={cn(
-                'absolute right-4 top-1/2 -translate-y-1/2 p-2 bg-white rounded-full transition-all',
+                'absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 p-2 bg-white rounded-full transition-all',
                 'shadow-[0_0_0_1px_rgba(15,15,15,0.05),0_3px_6px_rgba(15,15,15,0.1)]',
-                'hover:bg-[var(--bg-hover)]',
+                'hover:bg-[var(--bg-hover)] active:bg-[var(--bg-active)]',
                 !hasNext && 'opacity-40 cursor-not-allowed'
               )}
               title="Next (→)"

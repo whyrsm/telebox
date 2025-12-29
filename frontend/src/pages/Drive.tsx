@@ -12,6 +12,7 @@ import { FilePreviewModal } from '@/components/modals/FilePreviewModal';
 import ImportModal from '@/components/modals/ImportModal';
 import { UploadProgress } from '@/components/upload/UploadProgress';
 import { TrashView } from '@/components/files/TrashView';
+import { MobileFAB } from '@/components/layout/MobileFAB';
 import { useDriveStore, FolderItem, FileItem } from '@/stores/drive.store';
 import { useFolders, useFiles, useFileSearch, useFavoriteFiles, useFavoriteFolders } from '@/lib/queries';
 import { useDriveActions } from '@/hooks/useDriveActions';
@@ -227,6 +228,11 @@ export function DrivePage() {
         isOpen={showImport}
         onClose={() => setShowImport(false)}
         onImportComplete={handleImportComplete}
+      />
+
+      <MobileFAB
+        onNewFolder={() => setShowNewFolder(true)}
+        onUpload={() => setShowUpload(true)}
       />
 
       <UploadProgress />

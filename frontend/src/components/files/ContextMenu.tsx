@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { Download, Pencil, Trash2, FolderPlus, Upload, Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -28,6 +29,36 @@ export function ContextMenu({
   onNewFolder,
   onUpload,
 }: ContextMenuProps) {
+  const [position, setPosition] = useState({ x, y });
+
+  // Adjust position to keep menu in viewport
+  useEffect(() => {
+    const menuWidth = 180;
+    const menuHeight = type === 'background' ? 100 : 180;
+    const padding = 8;
+
+    let adjustedX = x;
+    let adjustedY = y;
+
+    // Adjust horizontal position
+    if (x + menuWidth > window.innerWidth - padding) {
+      adjustedX = window.innerWidth - menuWidth - padding;
+    }
+    if (adjustedX < padding) {
+      adjustedX = padding;
+    }
+
+    // Adjust vertical position
+    if (y + menuHeight > window.innerHeight - padding) {
+      adjustedY = window.innerHeight - menuHeight - padding;
+    }
+    if (adjustedY < padding) {
+      adjustedY = padding;
+    }
+
+    setPosition({ x: adjustedX, y: adjustedY });
+  }, [x, y, type]);
+
   const menuItems = type === 'background' 
     ? [
         { icon: FolderPlus, label: 'New Folder', onClick: onNewFolder || (() => {}) },
@@ -49,7 +80,7 @@ export function ContextMenu({
       <div className="fixed inset-0 z-40" onClick={onClose} />
       <div
         className="fixed z-50 bg-white rounded-lg p-1 min-w-[160px] animate-slideUp shadow-[0_0_0_1px_rgba(15,15,15,0.05),0_3px_6px_rgba(15,15,15,0.1),0_9px_24px_rgba(15,15,15,0.2)]"
-        style={{ left: x, top: y }}
+        style={{ left: position.x, top: position.y }}
       >
         {menuItems.map((item, index) => (
           <button
@@ -59,8 +90,8 @@ export function ContextMenu({
               onClose();
             }}
             className={cn(
-              'w-full flex items-center gap-2 px-3 py-1.5 text-sm text-left rounded',
-              'hover:bg-[var(--bg-hover)] transition-colors',
+              'w-full flex items-center gap-2 px-3 py-2.5 sm:py-1.5 text-sm text-left rounded',
+              'hover:bg-[var(--bg-hover)] active:bg-[var(--bg-active)] transition-colors',
               item.danger ? 'text-[#dc2626]' : 'text-[var(--text-primary)]'
             )}
           >

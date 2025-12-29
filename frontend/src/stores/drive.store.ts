@@ -37,6 +37,7 @@ interface DriveState {
   selectedItems: Set<string>;
   viewMode: ViewMode;
   searchQuery: string;
+  sidebarOpen: boolean;
 
   // Actions
   setCurrentFolder: (folderId: string | null, path?: FolderItem[]) => void;
@@ -48,6 +49,8 @@ interface DriveState {
   clearSelection: () => void;
   addToPath: (folder: FolderItem) => void;
   navigateToPathIndex: (index: number) => void;
+  setSidebarOpen: (open: boolean) => void;
+  toggleSidebar: () => void;
 }
 
 export const useDriveStore = create<DriveState>((set, get) => ({
@@ -57,6 +60,7 @@ export const useDriveStore = create<DriveState>((set, get) => ({
   selectedItems: new Set(),
   viewMode: 'grid',
   searchQuery: '',
+  sidebarOpen: false,
 
   setCurrentFolder: (folderId, path) => {
     set({
@@ -117,4 +121,7 @@ export const useDriveStore = create<DriveState>((set, get) => ({
       };
     });
   },
+
+  setSidebarOpen: (open) => set({ sidebarOpen: open }),
+  toggleSidebar: () => set((state) => ({ sidebarOpen: !state.sidebarOpen })),
 }));

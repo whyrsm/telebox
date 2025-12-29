@@ -66,7 +66,7 @@ export const FileGrid = memo(function FileGrid({
 
   return (
     <div 
-      className="grid grid-cols-[repeat(auto-fill,minmax(100px,1fr))] gap-1 p-3 min-h-full content-start"
+      className="grid grid-cols-[repeat(auto-fill,minmax(80px,1fr))] sm:grid-cols-[repeat(auto-fill,minmax(100px,1fr))] gap-1 p-2 sm:p-3 min-h-full content-start"
       onClick={handleBackgroundClick}
       onDragOver={handleBackgroundDragOver}
       onDrop={handleDropOnBackground}
@@ -77,8 +77,8 @@ export const FileGrid = memo(function FileGrid({
           data-folder-item
           draggable
           className={cn(
-            'flex flex-col items-center p-3 rounded cursor-pointer transition-all duration-200 relative',
-            'hover:bg-[var(--bg-hover)]',
+            'flex flex-col items-center p-2 sm:p-3 rounded cursor-pointer transition-all duration-200 relative',
+            'hover:bg-[var(--bg-hover)] active:bg-[var(--bg-active)]',
             selectedItems.has(folder.id) && 'bg-[var(--selected-bg)]',
             dropTargetId === folder.id && 'ring-2 ring-[var(--accent-color)] bg-[var(--bg-hover)]',
             successFlashId === folder.id && 'animate-success-flash'
@@ -100,8 +100,8 @@ export const FileGrid = memo(function FileGrid({
           {folder.isFavorite && (
             <Star size={12} className="absolute top-1 left-1 text-amber-500 fill-amber-500" />
           )}
-          <Folder size={40} strokeWidth={1.5} className="text-[var(--text-secondary)] mb-2" />
-          <span className="text-xs text-center truncate w-full text-[var(--text-primary)]">{folder.name}</span>
+          <Folder size={32} strokeWidth={1.5} className="sm:w-10 sm:h-10 text-[var(--text-secondary)] mb-1 sm:mb-2" />
+          <span className="text-[11px] sm:text-xs text-center truncate w-full text-[var(--text-primary)]">{folder.name}</span>
         </div>
       ))}
 
@@ -115,8 +115,8 @@ export const FileGrid = memo(function FileGrid({
             data-file-item
             draggable
             className={cn(
-              'flex flex-col items-center p-3 rounded cursor-pointer transition-colors relative',
-              'hover:bg-[var(--bg-hover)]',
+              'flex flex-col items-center p-2 sm:p-3 rounded cursor-pointer transition-colors relative',
+              'hover:bg-[var(--bg-hover)] active:bg-[var(--bg-active)]',
               selectedItems.has(file.id) && 'bg-[var(--selected-bg)]'
             )}
             onClick={(e) => handleClick(e, file, 'file')}
@@ -133,8 +133,8 @@ export const FileGrid = memo(function FileGrid({
             {file.isFavorite && (
               <Star size={12} className="absolute top-1 left-1 text-amber-500 fill-amber-500" />
             )}
-            <Icon size={40} strokeWidth={1.5} className="text-[var(--text-secondary)] mb-2" />
-            <span className="text-xs text-center truncate w-full text-[var(--text-primary)]">{file.name}</span>
+            <Icon size={32} strokeWidth={1.5} className="sm:w-10 sm:h-10 text-[var(--text-secondary)] mb-1 sm:mb-2" />
+            <span className="text-[11px] sm:text-xs text-center truncate w-full text-[var(--text-primary)]">{file.name}</span>
             <span className="text-[10px] text-[var(--text-tertiary)]">
               {formatFileSize(file.size)}
             </span>

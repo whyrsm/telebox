@@ -74,8 +74,8 @@ export function UploadProgress() {
   return (
     <div
       className={cn(
-        'fixed bottom-4 right-4 z-50 bg-white rounded-lg',
-        'w-72 max-h-80 flex flex-col',
+        'fixed bottom-4 right-4 left-4 sm:left-auto z-50 bg-white rounded-lg',
+        'sm:w-72 max-h-80 flex flex-col',
         'shadow-[0_0_0_1px_rgba(15,15,15,0.05),0_3px_6px_rgba(15,15,15,0.1),0_9px_24px_rgba(15,15,15,0.2)]'
       )}
     >
