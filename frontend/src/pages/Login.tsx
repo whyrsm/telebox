@@ -94,8 +94,15 @@ export function LoginPage() {
         <div className="bg-white rounded-lg p-6 shadow-[0_0_0_1px_rgba(15,15,15,0.05),0_3px_6px_rgba(15,15,15,0.1),0_9px_24px_rgba(15,15,15,0.2)]">
           <Logo size="lg" className="justify-center mb-6" />
 
-          <h1 className="text-base font-medium text-center mb-6 text-[var(--text-primary)]">
-            {step === 'phone' ? 'Sign in with Telegram' : 'Enter verification code'}
+          <h1 className="text-base font-medium text-center mb-6 text-[var(--text-primary)] flex items-center justify-center gap-2">
+            {step === 'phone' ? (
+              <>
+                Sign in with Telegram
+                <img src="/telegram_logo.svg" alt="Telegram" className="w-5 h-5" />
+              </>
+            ) : (
+              'Enter verification code'
+            )}
           </h1>
 
           {step === 'phone' ? (
@@ -105,7 +112,7 @@ export function LoginPage() {
                   Phone number
                 </label>
                 <PhoneInput
-                  defaultCountry="us"
+                  defaultCountry="id"
                   value={phone}
                   onChange={(phone) => {
                     setPhone(phone);
@@ -144,7 +151,7 @@ export function LoginPage() {
                   'transition-opacity'
                 )}
               >
-                {isLoading ? 'Sending...' : 'Send Code'}
+                {isLoading ? 'Sending Verification Code...' : 'Continue'}
               </button>
             </form>
           ) : (

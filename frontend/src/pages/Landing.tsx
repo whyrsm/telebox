@@ -113,8 +113,8 @@ export function LandingPage() {
             </h1>
 
             <p className="text-lg md:text-xl text-[var(--text-secondary)] max-w-2xl mx-auto mb-8 leading-relaxed">
-              Store unlimited files for free using your Telegram account. <br className="hidden md:block" />
-              Easy to use, completely private, and accessible everywhere.
+              Unlimited storage powered by Telegram. <br className="hidden md:block" />
+              No more deleting photos or "upgrade for more storage" emails.
             </p>
 
             <div className="flex flex-wrap items-center justify-center gap-4 mb-20">
@@ -122,14 +122,14 @@ export function LandingPage() {
                 to="/login"
                 className="bg-black text-white h-12 px-8 rounded-md font-medium text-base hover:bg-neutral-800 transition-all transform hover:-translate-y-0.5 flex items-center gap-2 shadow-lg shadow-black/5"
               >
-                Start Storing Free
+                Get Started Free
                 <ArrowRight size={18} />
               </Link>
               <a
-                href="#features"
+                href="#how-it-works"
                 className="bg-transparent hover:bg-[var(--bg-tertiary)] text-[var(--text-primary)] h-12 px-8 rounded-md font-medium text-base transition-colors flex items-center border border-transparent hover:border-[var(--border-color)]"
               >
-                See Features
+                How It Works
               </a>
             </div>
 
