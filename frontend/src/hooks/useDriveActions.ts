@@ -71,6 +71,16 @@ export function useDriveActions(currentFolderId: string | null) {
     setContextMenu(null);
   };
 
+  // Direct delete - doesn't depend on contextMenu state
+  const openDeleteConfirmDirect = (item: FileItem | FolderItem, type: 'file' | 'folder') => {
+    setDeleteItem({
+      id: item.id,
+      name: item.name,
+      type,
+    });
+    setShowDeleteConfirm(true);
+  };
+
   const handleDelete = () => {
     if (!deleteItem) return;
     if (deleteItem.type === 'folder') {
@@ -193,6 +203,16 @@ function getMimeTypeFromFilename(filename: string): string | null {
     setContextMenu(null);
   };
 
+  // Direct rename - doesn't depend on contextMenu state
+  const openRenameModalDirect = (item: FileItem | FolderItem, type: 'file' | 'folder') => {
+    setRenameItem({
+      id: item.id,
+      name: item.name,
+      type,
+    });
+    setShowRename(true);
+  };
+
   const closeRenameModal = () => {
     setShowRename(false);
     setRenameItem(null);
@@ -231,8 +251,10 @@ function getMimeTypeFromFilename(filename: string): string | null {
     handleDownload,
     handleContextMenu,
     openRenameModal,
+    openRenameModalDirect,
     closeRenameModal,
     openDeleteConfirm,
+    openDeleteConfirmDirect,
     closeDeleteConfirm,
     closePreview,
     handleToggleFavorite,

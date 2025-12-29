@@ -44,8 +44,10 @@ export function DrivePage() {
     handleDownload,
     handleContextMenu,
     openRenameModal,
+    openRenameModalDirect,
     closeRenameModal,
     openDeleteConfirm,
+    openDeleteConfirmDirect,
     closeDeleteConfirm,
     closePreview,
     handleToggleFavorite,
@@ -108,6 +110,8 @@ export function DrivePage() {
         <Sidebar 
           onNewFolder={() => setShowNewFolder(true)}
           onUpload={() => setShowUpload(true)}
+          onRenameFolder={(folder) => openRenameModalDirect(folder, 'folder')}
+          onDeleteFolder={(folder) => openDeleteConfirmDirect(folder, 'folder')}
         />
 
         <main className="flex-1 flex flex-col overflow-hidden">
