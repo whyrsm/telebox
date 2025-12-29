@@ -7,29 +7,52 @@ A privacy-focused cloud storage solution that uses Telegram as the storage backe
 - **Unlimited Storage** — Telegram provides unlimited cloud storage (2GB per file, 4GB with Premium)
 - **Privacy First** — Files are stored in your personal Telegram "Saved Messages", not on third-party servers
 - **Zero Storage Costs** — No monthly fees for storage space
-- **Familiar Interface** — Google Drive-like UI with Finder-inspired aesthetics
+- **Familiar Interface** — Google Drive-like layout with Finder-inspired aesthetics
 
 ## Features
 
 ### Core
-- Telegram phone authentication
-- Upload/download files to your Saved Messages
-- Virtual folder organization
-- Grid and list view modes
-- File search
-- Context menu actions (rename, move, delete)
+- ✅ Telegram phone authentication with country selector
+- ✅ Upload/download files to your Saved Messages
+- ✅ Virtual folder organization with breadcrumb navigation
+- ✅ Folder-based routing (direct URL navigation to folders)
+- ✅ Grid and list view modes
+- ✅ File search with debouncing
+- ✅ Context menu actions for files and folders (rename, move, delete)
+- ✅ Drag & drop upload
+- ✅ Drag & drop file moving between folders
+- ✅ Upload progress indicator
+- ✅ Multi-select with keyboard (Shift, Cmd/Ctrl) and drag selection box
+- ✅ Batch operations (move, delete multiple items)
+- ✅ Trash/recycle bin with soft delete and restore
+- ✅ Favorites/starred files and folders
+- ✅ Storage usage statistics
+- ✅ Empty state with onboarding
+- ✅ Landing page
 
 ### File Preview
-- Image viewer
-- Video player
-- Audio player
-- PDF viewer
-- Text file preview
+- ✅ Image viewer
+- ✅ Video player
+- ✅ Audio player
+- ✅ PDF viewer
+- ✅ Text file preview
 
 ### Import
-- Import existing files from Saved Messages
-- Import from Telegram groups and private chats
-- Sequential import with progress tracking
+- ✅ Import existing files from Saved Messages
+- ✅ Import from Telegram groups and private chats
+- ✅ Sequential import with progress tracking
+
+### Mobile & Responsive
+- ✅ Mobile-optimized UI with responsive layout
+- ✅ Touch-friendly interactions
+- ✅ Viewport adjustments for mobile devices
+- ✅ Mobile FAB (Floating Action Button) for quick actions
+
+### Performance
+- ✅ Optimized database indexes
+- ✅ Targeted cache invalidation
+- ✅ Component memoization
+- ✅ Search debouncing (300ms)
 
 ## Architecture
 
@@ -100,11 +123,30 @@ VITE_API_URL=http://localhost:3000/api
 4. Create a new application
 5. Copy `API_ID` and `API_HASH` to your backend `.env`
 
+## Pricing
+
+### Personal Free
+- Unlimited storage (powered by Telegram)
+- Full file management and organization
+- File preview for all formats
+- Single user only — no sharing
+
+### Personal Plus (Coming Soon)
+**$12/year** (launch discount, regular $20/year)
+- Everything in Free, plus:
+- Import from Telegram chats
+- Private sharing links (password + expiration)
+- Shared folders (up to 10 collaborators)
+
+See [Pricing Model](docs/20251229_pricing_model.md) for details.
+
 ## Documentation
 
 See the `docs/` folder for detailed documentation:
 - [Product Roadmap](docs/20251228_product_roadmap.md)
 - [Project Overview](docs/20251228_project_overview.md)
+- [Pricing Model](docs/20251229_pricing_model.md)
+- [Performance Optimizations](docs/20251228_performance_optimizations.md)
 - [Design Guidelines](docs/design-guidelines.md)
 
 ## License

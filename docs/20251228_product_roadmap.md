@@ -12,61 +12,76 @@ Build a reliable, privacy-focused file storage solution that leverages Telegram'
 
 ## Current Status
 
-**Phase 1 (MVP)** — In Progress
+**Phase 1 (MVP)** — Complete ✅
 
-Core functionality is implemented:
-- ✅ Telegram phone authentication
+Core functionality is fully implemented:
+- ✅ Telegram phone authentication with country selector
 - ✅ View files from Saved Messages
-- ✅ Upload/download files
-- ✅ Delete files
+- ✅ Upload/download files with progress indicator
+- ✅ Soft delete with trash/recycle bin
 - ✅ Create virtual folders
-- ✅ Move files between folders
+- ✅ Move files between folders (batch operations)
 - ✅ Basic file search
 - ✅ Grid/List view toggle
-- ✅ Context menu actions
-- ⬜ Image preview
-- ⬜ Video preview
-- ⬜ Responsive design polish
+- ✅ Context menu actions (files & folders)
+- ✅ Image preview
+- ✅ Video preview
+- ✅ Folder-based routing with breadcrumb navigation
+- ✅ Multi-select with keyboard and drag selection
+- ✅ Favorites/starred functionality
+- ✅ Storage usage stats
+- ✅ Landing page
+- ✅ Responsive mobile UI
+- ✅ Empty state with onboarding
 
 ---
 
 ## Roadmap
 
-### Phase 1: MVP Completion (Current)
+### Phase 1: MVP Completion ✅
 
 **Goal:** Fully functional file manager with core features
 
-| Feature | Status | Priority |
-|---------|--------|----------|
-| Image preview modal | ✅ Done | — |
-| Video preview/player | ✅ Done | — |
-| File type icons | ✅ Done | — |
-| Responsive mobile layout | ⬜ Todo | Medium |
-| Upload progress indicator | ✅ Done | — |
-| Error handling improvements | ⬜ Todo | Medium |
+| Feature | Status |
+|---------|--------|
+| Image preview modal | ✅ Done |
+| Video preview/player | ✅ Done |
+| File type icons | ✅ Done |
+| Responsive mobile layout | ✅ Done |
+| Upload progress indicator | ✅ Done |
+| Error handling improvements | ✅ Done |
+| Multi-select functionality | ✅ Done |
+| Trash/recycle bin | ✅ Done |
+| Favorites system | ✅ Done |
+| Storage stats | ✅ Done |
+| Landing page | ✅ Done |
 
 **Tech Debt:**
 - Fix `any` types in services
 - Extract duplicate code (icon maps, handlers)
-- Add loading states to all async operations
+- Add loading states to remaining async operations
+- Add error boundaries for better error handling
+- Add comprehensive test coverage
 
 ---
 
-### Phase 2: Enhanced UX
+### Phase 2: Enhanced UX (Current)
 
 **Goal:** Polish the experience and add power-user features
 
-| Feature | Priority | Notes |
-|---------|----------|-------|
-| Drag & drop upload | High | Drop zone in main area |
-| Drag & drop file moving | High | Move files between folders |
-| Bulk file operations | High | Multi-select delete, move |
-| Sort by name/date/size | Medium | Column headers in list view |
-| File sharing (Telegram links) | Medium | Generate share links |
-| PDF preview | ✅ Done | — |
-| Audio player | ✅ Done | — |
-| Text file preview | ✅ Done | — |
-| Keyboard shortcuts | Low | Navigate, select, delete |
+| Feature | Status | Priority | Notes |
+|---------|--------|----------|-------|
+| Drag & drop upload | ✅ Done | — | — |
+| Drag & drop file moving | ✅ Done | — | — |
+| Bulk file operations | ✅ Done | — | Batch move, delete |
+| Multi-select (keyboard + drag) | ✅ Done | — | Shift, Cmd/Ctrl, drag box |
+| PDF preview | ✅ Done | — | — |
+| Audio player | ✅ Done | — | — |
+| Text file preview | ✅ Done | — | — |
+| Sort by name/date/size | ⬜ Todo | High | Column headers in list view |
+| File sharing (Telegram links) | ⬜ Todo | High | Generate share links |
+| Keyboard shortcuts | ⬜ Todo | Medium | Navigate, select, delete |
+| Recent files view | ⬜ Todo | Medium | Activity-based list |
 
 ---
 
@@ -74,16 +89,17 @@ Core functionality is implemented:
 
 **Goal:** Feature parity with mainstream cloud storage
 
-| Feature | Priority | Notes |
-|---------|----------|-------|
-| Import existing Saved Messages | ✅ Done | — |
-| Import from groups/private chats | ✅ Done | Sequential with progress bar |
-| Trash/recycle bin | High | Soft delete with restore |
-| Storage usage stats | Medium | Visual breakdown |
-| Dark/light theme toggle | Medium | System preference detection |
-| File versioning | Low | Keep previous versions |
-| Starred/favorites | Low | Quick access section |
-| Recent files | Low | Activity-based list |
+| Feature | Status | Priority | Notes |
+|---------|--------|----------|-------|
+| Import existing Saved Messages | ✅ Done | — | — |
+| Import from groups/private chats | ✅ Done | — | Sequential with progress bar |
+| Trash/recycle bin | ✅ Done | — | Soft delete with restore |
+| Starred/favorites | ✅ Done | — | Quick access section |
+| Storage usage stats | ✅ Done | — | Visual breakdown in sidebar |
+| Dark/light theme toggle | ⬜ Todo | High | System preference detection |
+| File versioning | ⬜ Todo | Low | Keep previous versions |
+| Recent files | ⬜ Todo | Medium | Activity-based list |
+| Advanced search filters | ⬜ Todo | Medium | By type, date, size |
 
 ---
 
@@ -186,4 +202,4 @@ Core functionality is implemented:
 
 ---
 
-*Last updated: 2024-12-28*
+*Last updated: 2025-12-29*
