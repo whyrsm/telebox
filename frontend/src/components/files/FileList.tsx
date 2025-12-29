@@ -6,6 +6,7 @@ import { FILE_ICON_MAP } from '@/lib/constants';
 import { useFileItemHandlers } from '@/hooks/useFileItemHandlers';
 import { useDragAndDrop } from '@/hooks/useDragAndDrop';
 import { MoveToast } from '@/components/ui/MoveToast';
+import { EmptyState } from './EmptyState';
 
 interface FileListProps {
   files: FileItem[];
@@ -15,6 +16,9 @@ interface FileListProps {
   onFolderOpen: (folder: FolderItem) => void;
   onFileOpen: (file: FileItem) => void;
   onContextMenu: (e: React.MouseEvent, item: FileItem | FolderItem, type: 'file' | 'folder') => void;
+  onUpload?: () => void;
+  onNewFolder?: () => void;
+  onImport?: () => void;
 }
 
 export const FileList = memo(function FileList({
@@ -25,6 +29,9 @@ export const FileList = memo(function FileList({
   onFolderOpen,
   onFileOpen,
   onContextMenu,
+  onUpload,
+  onNewFolder,
+  onImport,
 }: FileListProps) {
   const { selectedItems, clearSelection } = useDriveStore();
   const { handleClick, handleDoubleClick } = useFileItemHandlers(onFolderOpen, onFileOpen);
@@ -149,10 +156,11 @@ export const FileList = memo(function FileList({
       })}
 
       {folders.length === 0 && files.length === 0 && (
-        <div className="flex flex-col items-center justify-center py-16 text-[var(--text-tertiary)]">
-          <Folder size={40} strokeWidth={1.5} className="mb-2 opacity-50" />
-          <p className="text-sm">This folder is empty</p>
-        </div>
+        <EmptyState
+          isRootFolder={currentFolderId === null}
+          onUpload={onUpload || (() => {})}
+          onNewFolder={onNewFolder || (() => {})}
+        />
       )}
 
       {lastMoveResult && (

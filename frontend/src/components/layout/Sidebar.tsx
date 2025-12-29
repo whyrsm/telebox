@@ -70,10 +70,9 @@ function FolderTreeItem({ folder, level, onSelect, path }: FolderTreeItemProps) 
 interface SidebarProps {
   onNewFolder: () => void;
   onUpload: () => void;
-  onImport: () => void;
 }
 
-export function Sidebar({ onNewFolder, onUpload, onImport }: SidebarProps) {
+export function Sidebar({ onNewFolder, onUpload }: SidebarProps) {
   const { setCurrentFolder, currentFolderId } = useDriveStore();
   const { data: folderTree = [], isLoading } = useFolderTree();
 
@@ -91,7 +90,6 @@ export function Sidebar({ onNewFolder, onUpload, onImport }: SidebarProps) {
         <NewMenu 
           onNewFolder={onNewFolder}
           onUpload={onUpload}
-          onImport={onImport}
         />
       </div>
 

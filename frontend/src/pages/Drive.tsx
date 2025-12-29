@@ -93,7 +93,6 @@ export function DrivePage() {
         <Sidebar 
           onNewFolder={() => setShowNewFolder(true)}
           onUpload={() => setShowUpload(true)}
-          onImport={() => setShowImport(true)}
         />
 
         <main className="flex-1 flex flex-col overflow-hidden">
@@ -109,6 +108,9 @@ export function DrivePage() {
                 onFolderOpen={handleFolderOpen}
                 onFileOpen={handleFileOpen}
                 onContextMenu={handleContextMenu}
+                onUpload={() => setShowUpload(true)}
+                onNewFolder={() => setShowNewFolder(true)}
+                onImport={() => setShowImport(true)}
               />
             ) : (
               <FileList
@@ -119,6 +121,9 @@ export function DrivePage() {
                 onFolderOpen={handleFolderOpen}
                 onFileOpen={handleFileOpen}
                 onContextMenu={handleContextMenu}
+                onUpload={() => setShowUpload(true)}
+                onNewFolder={() => setShowNewFolder(true)}
+                onImport={() => setShowImport(true)}
               />
             )}
           </div>

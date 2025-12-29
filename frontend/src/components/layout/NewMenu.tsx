@@ -5,10 +5,9 @@ import { cn } from '@/lib/utils';
 interface NewMenuProps {
   onNewFolder: () => void;
   onUpload: () => void;
-  onImport: () => void;
 }
 
-export function NewMenu({ onNewFolder, onUpload, onImport }: NewMenuProps) {
+export function NewMenu({ onNewFolder, onUpload }: NewMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -29,9 +28,9 @@ export function NewMenu({ onNewFolder, onUpload, onImport }: NewMenuProps) {
   }, [isOpen]);
 
   const menuItems = [
-    { icon: FolderPlus, label: 'New Folder', onClick: onNewFolder },
-    { icon: Upload, label: 'File Upload', onClick: onUpload },
-    { icon: Download, label: 'Import from Telegram', onClick: onImport },
+    { icon: FolderPlus, label: 'New Folder', onClick: onNewFolder, disabled: false },
+    { icon: Upload, label: 'File Upload', onClick: onUpload, disabled: false },
+    { icon: Download, label: 'Import from Telegram', onClick: () => {}, disabled: true, badge: 'Coming Soon' },
   ];
 
   return (
@@ -56,17 +55,27 @@ export function NewMenu({ onNewFolder, onUpload, onImport }: NewMenuProps) {
             <button
               key={index}
               onClick={() => {
-                item.onClick();
-                setIsOpen(false);
+                if (!item.disabled) {
+                  item.onClick();
+                  setIsOpen(false);
+                }
               }}
+              disabled={item.disabled}
               className={cn(
                 'w-full flex items-center gap-2 px-3 py-2 text-sm text-left rounded',
-                'hover:bg-[var(--bg-hover)] transition-colors',
-                'text-[var(--text-primary)]'
+                'transition-colors text-[var(--text-primary)]',
+                item.disabled 
+                  ? 'opacity-50 cursor-not-allowed' 
+                  : 'hover:bg-[var(--bg-hover)]'
               )}
             >
               <item.icon size={16} strokeWidth={2} className="text-[var(--text-secondary)]" />
-              <span>{item.label}</span>
+              <span className="flex-1">{item.label}</span>
+              {item.badge && (
+                <span className="text-[10px] px-1.5 py-0.5 rounded bg-[var(--text-tertiary)] text-white">
+                  {item.badge}
+                </span>
+              )}
             </button>
           ))}
         </div>

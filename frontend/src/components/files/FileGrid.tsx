@@ -6,6 +6,7 @@ import { FILE_ICON_MAP } from '@/lib/constants';
 import { useFileItemHandlers } from '@/hooks/useFileItemHandlers';
 import { useDragAndDrop } from '@/hooks/useDragAndDrop';
 import { MoveToast } from '@/components/ui/MoveToast';
+import { EmptyState } from './EmptyState';
 
 interface FileGridProps {
   files: FileItem[];
@@ -15,6 +16,9 @@ interface FileGridProps {
   onFolderOpen: (folder: FolderItem) => void;
   onFileOpen: (file: FileItem) => void;
   onContextMenu: (e: React.MouseEvent, item: FileItem | FolderItem, type: 'file' | 'folder') => void;
+  onUpload?: () => void;
+  onNewFolder?: () => void;
+  onImport?: () => void;
 }
 
 export const FileGrid = memo(function FileGrid({
@@ -25,6 +29,9 @@ export const FileGrid = memo(function FileGrid({
   onFolderOpen,
   onFileOpen,
   onContextMenu,
+  onUpload,
+  onNewFolder,
+  onImport,
 }: FileGridProps) {
   const { selectedItems, clearSelection } = useDriveStore();
   const { handleClick, handleDoubleClick } = useFileItemHandlers(onFolderOpen, onFileOpen);
@@ -132,9 +139,12 @@ export const FileGrid = memo(function FileGrid({
       })}
 
       {folders.length === 0 && files.length === 0 && (
-        <div className="col-span-full flex flex-col items-center justify-center py-16 text-[var(--text-tertiary)]">
-          <Folder size={40} strokeWidth={1.5} className="mb-2 opacity-50" />
-          <p className="text-sm">This folder is empty</p>
+        <div className="col-span-full">
+          <EmptyState
+            isRootFolder={currentFolderId === null}
+            onUpload={onUpload || (() => {})}
+            onNewFolder={onNewFolder || (() => {})}
+          />
         </div>
       )}
 
