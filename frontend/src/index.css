@@ -7,6 +7,7 @@
   --bg-tertiary: #E9E9E7;
   --bg-hover: rgba(55, 53, 47, 0.08);
   --bg-active: rgba(55, 53, 47, 0.16);
+  --selected-bg: rgba(35, 131, 226, 0.15); /* Light blue selection */
 
   /* Text */
   --text-primary: #37352F; /* Dark charcoal */

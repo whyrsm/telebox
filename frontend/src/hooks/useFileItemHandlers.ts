@@ -4,7 +4,7 @@ export function useFileItemHandlers(
   onFolderOpen: (folder: FolderItem) => void,
   onFileOpen: (file: FileItem) => void
 ) {
-  const { toggleSelect } = useDriveStore();
+  const { toggleSelect, clearSelection, selectedItems } = useDriveStore();
 
   const handleClick = (
     e: React.MouseEvent,
@@ -12,12 +12,17 @@ export function useFileItemHandlers(
     type: 'file' | 'folder'
   ) => {
     if (e.ctrlKey || e.metaKey) {
+      // Ctrl/Cmd+click toggles selection
       toggleSelect(item.id);
       return;
     }
 
-    // Single click only selects items
-    toggleSelect(item.id);
+    // Single click replaces selection with this item
+    // Only clear and re-select if this item isn't the only selected item
+    if (selectedItems.size !== 1 || !selectedItems.has(item.id)) {
+      clearSelection();
+      toggleSelect(item.id);
+    }
   };
 
   const handleDoubleClick = (
