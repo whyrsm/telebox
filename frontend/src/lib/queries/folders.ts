@@ -63,6 +63,8 @@ export function useMoveFolder() {
       queryClient.invalidateQueries({ queryKey: queryKeys.folders.list(sourceParentId) });
       queryClient.invalidateQueries({ queryKey: queryKeys.folders.list(parentId) });
       queryClient.invalidateQueries({ queryKey: queryKeys.folders.tree() });
+      // Invalidate all folder queries to ensure UI updates
+      queryClient.invalidateQueries({ queryKey: queryKeys.folders.all });
     },
   });
 }
@@ -77,6 +79,8 @@ export function useBatchMoveFolders() {
       queryClient.invalidateQueries({ queryKey: queryKeys.folders.list(sourceParentId) });
       queryClient.invalidateQueries({ queryKey: queryKeys.folders.list(parentId) });
       queryClient.invalidateQueries({ queryKey: queryKeys.folders.tree() });
+      // Invalidate all folder queries to ensure UI updates
+      queryClient.invalidateQueries({ queryKey: queryKeys.folders.all });
     },
   });
 }

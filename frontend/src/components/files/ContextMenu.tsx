@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Download, Pencil, Trash2, FolderPlus, Upload, Star } from 'lucide-react';
+import { Download, Pencil, Trash2, FolderPlus, Upload, Star, FolderInput } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface ContextMenuProps {
@@ -14,6 +14,7 @@ interface ContextMenuProps {
   onToggleFavorite?: () => void;
   onNewFolder?: () => void;
   onUpload?: () => void;
+  onMoveTo?: () => void;
 }
 
 export function ContextMenu({
@@ -28,6 +29,7 @@ export function ContextMenu({
   onToggleFavorite,
   onNewFolder,
   onUpload,
+  onMoveTo,
 }: ContextMenuProps) {
   const [position, setPosition] = useState({ x, y });
 
@@ -70,6 +72,9 @@ export function ContextMenu({
           : []),
         ...(onToggleFavorite
           ? [{ icon: Star, label: isFavorite ? 'Remove from Favorites' : 'Add to Favorites', onClick: onToggleFavorite, highlight: isFavorite }]
+          : []),
+        ...(onMoveTo
+          ? [{ icon: FolderInput, label: 'Move to...', onClick: onMoveTo }]
           : []),
         { icon: Pencil, label: 'Rename', onClick: onRename },
         { icon: Trash2, label: 'Delete', onClick: onDelete, danger: true },

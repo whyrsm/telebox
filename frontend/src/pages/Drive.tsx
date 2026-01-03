@@ -9,6 +9,7 @@ import { NewFolderModal } from '@/components/modals/NewFolderModal';
 import { RenameModal } from '@/components/modals/RenameModal';
 import { DeleteConfirmModal } from '@/components/modals/DeleteConfirmModal';
 import { FilePreviewModal } from '@/components/modals/FilePreviewModal';
+import { MoveToModal } from '@/components/modals/MoveToModal';
 import ImportModal from '@/components/modals/ImportModal';
 import { UploadProgress } from '@/components/upload/UploadProgress';
 import { TrashView } from '@/components/files/TrashView';
@@ -23,7 +24,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useDebouncedCallback } from 'use-debounce';
 import { useParams, useNavigate } from 'react-router-dom';
 import { foldersApi } from '@/lib/api';
-import { Trash2, X, Upload } from 'lucide-react';
+import { Trash2, X, Upload, FolderInput } from 'lucide-react';
 
 export function DrivePage() {
   const { folderId } = useParams<{ folderId: string }>();
@@ -66,9 +67,11 @@ export function DrivePage() {
     showRename,
     showPreview,
     showDeleteConfirm,
+    showMoveTo,
     previewFile,
     contextMenu,
     renameItem,
+    moveItems,
     deleteItem,
     deleteItems,
     setShowUpload,
@@ -89,6 +92,14 @@ export function DrivePage() {
     closeDeleteConfirm,
     closePreview,
     handleToggleFavorite,
+    openMoveToModal,
+    openMoveToModalDirect,
+    openBulkMoveToModal,
+    handleMove,
+    closeMoveToModal,
+    getMoveItemType,
+    getExcludeFolderIds,
+    isMoveLoading,
   } = useDriveActions(currentFolderId);
 
   // Queries
@@ -174,6 +185,29 @@ export function DrivePage() {
     }
   };
 
+  const handleBulkMove = () => {
+    const items: Array<FileItem | FolderItem> = [];
+    const types: Array<'file' | 'folder'> = [];
+    
+    selectedItems.forEach(id => {
+      const file = sortedFiles.find(f => f.id === id);
+      const folder = sortedFolders.find(f => f.id === id);
+      
+      if (file) {
+        items.push(file);
+        types.push('file');
+      } else if (folder) {
+        items.push(folder);
+        types.push('folder');
+      }
+    });
+    
+    if (items.length > 0) {
+      openBulkMoveToModal(items, types);
+      clearSelection();
+    }
+  };
+
   // Global drag and drop file upload handlers
   const handleGlobalDragEnter = useCallback((e: DragEvent) => {
     e.preventDefault();
@@ -233,6 +267,7 @@ export function DrivePage() {
           onImport={() => setShowImport(true)}
           onRenameFolder={(folder) => openRenameModalDirect(folder, 'folder')}
           onDeleteFolder={(folder) => openDeleteConfirmDirect(folder, 'folder')}
+          onMoveFolder={(folder) => openMoveToModalDirect(folder, 'folder')}
         />
 
         <main className="flex-1 flex flex-col overflow-hidden">
@@ -300,6 +335,7 @@ export function DrivePage() {
           onRename={openRenameModal}
           onDelete={openDeleteConfirm}
           onToggleFavorite={handleToggleFavorite}
+          onMoveTo={openMoveToModal}
         />
       )}
 
@@ -366,6 +402,16 @@ export function DrivePage() {
         onImportComplete={handleImportComplete}
       />
 
+      <MoveToModal
+        isOpen={showMoveTo}
+        onClose={closeMoveToModal}
+        onMove={handleMove}
+        itemCount={moveItems?.length || 0}
+        itemType={getMoveItemType()}
+        excludeFolderIds={getExcludeFolderIds()}
+        isLoading={isMoveLoading}
+      />
+
       <MobileFAB
         onNewFolder={() => setShowNewFolder(true)}
         onUpload={() => setShowUpload(true)}
@@ -381,6 +427,13 @@ export function DrivePage() {
             {selectedItems.size} selected
           </span>
           <div className="w-px h-4 bg-[var(--border-color)]" />
+          <button
+            onClick={handleBulkMove}
+            className="flex items-center gap-1.5 px-3 py-1 text-sm text-[var(--text-primary)] hover:bg-[var(--bg-hover)] rounded-full transition-colors"
+          >
+            <FolderInput size={14} />
+            Move to
+          </button>
           <button
             onClick={handleBulkDelete}
             className="flex items-center gap-1.5 px-3 py-1 text-sm text-[#dc2626] hover:bg-[var(--bg-hover)] rounded-full transition-colors"

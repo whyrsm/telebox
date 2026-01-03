@@ -11,11 +11,20 @@ import {
   useBatchDeleteFiles,
   useToggleFileFavorite,
   useToggleFolderFavorite,
+  useMoveFile,
+  useBatchMoveFiles,
+  useMoveFolder,
+  useBatchMoveFolders,
 } from '@/lib/queries';
 
 interface RenameItem {
   id: string;
   name: string;
+  type: 'file' | 'folder';
+}
+
+interface MoveItem {
+  id: string;
   type: 'file' | 'folder';
 }
 
@@ -32,9 +41,11 @@ export function useDriveActions(currentFolderId: string | null) {
   const [showRename, setShowRename] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showMoveTo, setShowMoveTo] = useState(false);
   const [previewFile, setPreviewFile] = useState<FileItem | null>(null);
   const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null);
   const [renameItem, setRenameItem] = useState<RenameItem | null>(null);
+  const [moveItems, setMoveItems] = useState<MoveItem[] | null>(null);
   const [deleteItem, setDeleteItem] = useState<{ id: string; name: string; type: 'file' | 'folder' } | null>(null);
   const [deleteItems, setDeleteItems] = useState<{ 
     ids: string[]; 
@@ -54,6 +65,10 @@ export function useDriveActions(currentFolderId: string | null) {
   const batchDeleteFiles = useBatchDeleteFiles();
   const toggleFileFavorite = useToggleFileFavorite();
   const toggleFolderFavorite = useToggleFolderFavorite();
+  const moveFile = useMoveFile();
+  const batchMoveFiles = useBatchMoveFiles();
+  const moveFolder = useMoveFolder();
+  const batchMoveFolders = useBatchMoveFolders();
 
   const handleCreateFolder = (name: string) => {
     createFolder.mutate({
@@ -284,6 +299,87 @@ function getMimeTypeFromFilename(filename: string): string | null {
     setContextMenu(null);
   };
 
+  // Move to handlers
+  const openMoveToModal = () => {
+    if (!contextMenu) return;
+    setMoveItems([{ id: contextMenu.item.id, type: contextMenu.type }]);
+    setShowMoveTo(true);
+    setContextMenu(null);
+  };
+
+  const openMoveToModalDirect = (item: FileItem | FolderItem, type: 'file' | 'folder') => {
+    setMoveItems([{ id: item.id, type }]);
+    setShowMoveTo(true);
+  };
+
+  const openBulkMoveToModal = (items: Array<FileItem | FolderItem>, types: Array<'file' | 'folder'>) => {
+    const moveItemsList = items.map((item, index) => ({
+      id: item.id,
+      type: types[index],
+    }));
+    setMoveItems(moveItemsList);
+    setShowMoveTo(true);
+  };
+
+  const handleMove = (targetFolderId: string | null) => {
+    if (!moveItems || moveItems.length === 0) return;
+
+    const fileIds = moveItems.filter(item => item.type === 'file').map(item => item.id);
+    const folderIds = moveItems.filter(item => item.type === 'folder').map(item => item.id);
+
+    // Move files
+    if (fileIds.length === 1) {
+      moveFile.mutate({ 
+        id: fileIds[0], 
+        folderId: targetFolderId, 
+        sourceFolderId: currentFolderId 
+      });
+    } else if (fileIds.length > 1) {
+      batchMoveFiles.mutate({ 
+        fileIds, 
+        folderId: targetFolderId, 
+        sourceFolderId: currentFolderId 
+      });
+    }
+
+    // Move folders
+    if (folderIds.length === 1) {
+      moveFolder.mutate({ 
+        id: folderIds[0], 
+        parentId: targetFolderId, 
+        sourceParentId: currentFolderId 
+      });
+    } else if (folderIds.length > 1) {
+      batchMoveFolders.mutate({ 
+        folderIds, 
+        parentId: targetFolderId, 
+        sourceParentId: currentFolderId 
+      });
+    }
+
+    closeMoveToModal();
+  };
+
+  const closeMoveToModal = () => {
+    setShowMoveTo(false);
+    setMoveItems(null);
+  };
+
+  // Get move item type for modal display
+  const getMoveItemType = (): 'file' | 'folder' | 'mixed' => {
+    if (!moveItems || moveItems.length === 0) return 'file';
+    const hasFiles = moveItems.some(item => item.type === 'file');
+    const hasFolders = moveItems.some(item => item.type === 'folder');
+    if (hasFiles && hasFolders) return 'mixed';
+    return hasFiles ? 'file' : 'folder';
+  };
+
+  // Get folder IDs to exclude from move target (can't move folder into itself)
+  const getExcludeFolderIds = (): string[] => {
+    if (!moveItems) return [];
+    return moveItems.filter(item => item.type === 'folder').map(item => item.id);
+  };
+
   return {
     // State
     showUpload,
@@ -291,9 +387,11 @@ function getMimeTypeFromFilename(filename: string): string | null {
     showRename,
     showPreview,
     showDeleteConfirm,
+    showMoveTo,
     previewFile,
     contextMenu,
     renameItem,
+    moveItems,
     deleteItem,
     deleteItems,
     // Setters
@@ -316,5 +414,14 @@ function getMimeTypeFromFilename(filename: string): string | null {
     closeDeleteConfirm,
     closePreview,
     handleToggleFavorite,
+    // Move handlers
+    openMoveToModal,
+    openMoveToModalDirect,
+    openBulkMoveToModal,
+    handleMove,
+    closeMoveToModal,
+    getMoveItemType,
+    getExcludeFolderIds,
+    isMoveLoading: moveFile.isPending || batchMoveFiles.isPending || moveFolder.isPending || batchMoveFolders.isPending,
   };
 }

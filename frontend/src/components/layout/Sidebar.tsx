@@ -79,6 +79,7 @@ interface SidebarProps {
   onImport?: () => void;
   onRenameFolder?: (folder: FolderItem) => void;
   onDeleteFolder?: (folder: FolderItem) => void;
+  onMoveFolder?: (folder: FolderItem) => void;
 }
 
 interface SidebarContextMenu {
@@ -88,7 +89,7 @@ interface SidebarContextMenu {
   folder?: FolderItem;
 }
 
-export function Sidebar({ onNewFolder, onUpload, onImport, onRenameFolder, onDeleteFolder }: SidebarProps) {
+export function Sidebar({ onNewFolder, onUpload, onImport, onRenameFolder, onDeleteFolder, onMoveFolder }: SidebarProps) {
   const { setCurrentFolder, setCurrentView, currentFolderId, currentView, sidebarOpen, setSidebarOpen } = useDriveStore();
   const { data: folderTree = [], isLoading } = useFolderTree();
   const { data: favoriteFolders = [] } = useFavoriteFolders();
@@ -165,6 +166,13 @@ export function Sidebar({ onNewFolder, onUpload, onImport, onRenameFolder, onDel
   const handleDelete = () => {
     if (contextMenu?.folder && onDeleteFolder) {
       onDeleteFolder(contextMenu.folder);
+    }
+    setContextMenu(null);
+  };
+
+  const handleMoveTo = () => {
+    if (contextMenu?.folder && onMoveFolder) {
+      onMoveFolder(contextMenu.folder);
     }
     setContextMenu(null);
   };
@@ -259,6 +267,7 @@ export function Sidebar({ onNewFolder, onUpload, onImport, onRenameFolder, onDel
           onClose={() => setContextMenu(null)}
           onRename={handleRename}
           onDelete={handleDelete}
+          onMoveTo={contextMenu.type === 'folder' ? handleMoveTo : undefined}
           onNewFolder={() => {
             onNewFolder();
             setContextMenu(null);

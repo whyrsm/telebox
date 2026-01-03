@@ -69,6 +69,8 @@ export function useMoveFile() {
       // Invalidate both source and destination folders
       queryClient.invalidateQueries({ queryKey: queryKeys.files.list(sourceFolderId) });
       queryClient.invalidateQueries({ queryKey: queryKeys.files.list(folderId) });
+      // Invalidate all file queries to ensure UI updates
+      queryClient.invalidateQueries({ queryKey: queryKeys.files.all });
     },
   });
 }
@@ -82,6 +84,8 @@ export function useBatchMoveFiles() {
     onSuccess: (_, { folderId, sourceFolderId }) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.files.list(sourceFolderId) });
       queryClient.invalidateQueries({ queryKey: queryKeys.files.list(folderId) });
+      // Invalidate all file queries to ensure UI updates
+      queryClient.invalidateQueries({ queryKey: queryKeys.files.all });
     },
   });
 }
