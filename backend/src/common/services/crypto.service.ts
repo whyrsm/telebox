@@ -22,12 +22,12 @@ export class CryptoService {
   }
 
   /**
-   * Derives a 32-byte encryption key from the user's session string.
-   * The session string is unique per user, so each user gets a unique key.
+   * Derives a 32-byte encryption key from the user's raw (decrypted) session string.
+   * This ensures the key is stable even if the database encryption format changes.
    */
-  deriveKeyFromSession(encryptedSessionString: string): Buffer {
-    // Use SHA-256 to derive a consistent 32-byte key from the session
-    return createHash('sha256').update(encryptedSessionString).digest();
+  deriveKeyFromSession(rawSessionString: string): Buffer {
+    // Use SHA-256 to derive a consistent 32-byte key from the raw session
+    return createHash('sha256').update(rawSessionString).digest();
   }
 
   /**

@@ -27,7 +27,7 @@ export class FilesService {
     private telegramService: TelegramService,
     private authService: AuthService,
     private cryptoService: CryptoService,
-  ) {}
+  ) { }
 
   /**
    * Gets the encryption key for a user by deriving it from their session string.
@@ -36,7 +36,10 @@ export class FilesService {
   private async getUserKey(userId: string): Promise<Buffer> {
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user) throw new NotFoundException('User not found');
-    return this.cryptoService.deriveKeyFromSession(user.sessionString);
+
+    // Decrypt the session string first to get a stable key source
+    const rawSessionString = this.cryptoService.decryptSession(user.sessionString);
+    return this.cryptoService.deriveKeyFromSession(rawSessionString);
   }
 
   private encryptName(name: string, userKey: Buffer): string {
@@ -89,7 +92,7 @@ export class FilesService {
   ) {
     const userKey = await this.getUserKey(userId);
     const client = await this.authService.getClientForUser(userId);
-    
+
     try {
       const message = await this.telegramService.uploadFile(
         client,
@@ -122,7 +125,7 @@ export class FilesService {
     const userKey = await this.getUserKey(userId);
     const file = await this.findOneRaw(id, userId);
     const client = await this.authService.getClientForUser(userId);
-    
+
     try {
       const buffer = await this.telegramService.downloadFile(
         client,
@@ -231,7 +234,7 @@ export class FilesService {
     if (!file.deletedAt) {
       throw new NotFoundException('File must be in trash before permanent deletion');
     }
-    
+
     const client = await this.authService.getClientForUser(userId);
     try {
       await this.telegramService.deleteMessage(client, Number(file.messageId));
@@ -261,12 +264,12 @@ export class FilesService {
           // Continue even if Telegram delete fails
         }
       }
-      
+
       // Delete from database
       await this.prisma.file.deleteMany({
         where: { userId, deletedAt: { not: null } },
       });
-      
+
       return { count: trashedFiles.length };
     } finally {
       await client.disconnect();
@@ -282,7 +285,7 @@ export class FilesService {
         deletedAt: null,
       },
     });
-    
+
     // Decrypt names and filter by query
     const lowerQuery = query.toLowerCase();
     return files

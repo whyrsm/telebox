@@ -28,7 +28,7 @@ export class ImportService {
     private telegramService: TelegramService,
     private authService: AuthService,
     private cryptoService: CryptoService,
-  ) {}
+  ) { }
 
   /**
    * Gets the encryption key for a user by deriving it from their session string.
@@ -36,7 +36,10 @@ export class ImportService {
   private async getUserKey(userId: string): Promise<Buffer> {
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user) throw new NotFoundException('User not found');
-    return this.cryptoService.deriveKeyFromSession(user.sessionString);
+
+    // Decrypt the session string first to get a stable key source
+    const rawSessionString = this.cryptoService.decryptSession(user.sessionString);
+    return this.cryptoService.deriveKeyFromSession(rawSessionString);
   }
 
   private encryptName(name: string, userKey: Buffer): string {
@@ -54,7 +57,7 @@ export class ImportService {
       console.log('Fetching dialogs for user:', userId);
       const dialogs = await this.telegramService.getDialogs(client);
       console.log('Dialogs fetched:', dialogs.length);
-      
+
       const dialogInfos: DialogInfo[] = [];
 
       // Add Saved Messages first
@@ -134,20 +137,20 @@ export class ImportService {
   async importFiles(userId: string, dto: ImportFilesDto) {
     console.log('Starting import for user:', userId);
     console.log('Import DTO:', dto);
-    
+
     const userKey = await this.getUserKey(userId);
     const client = await this.authService.getClientForUser(userId);
 
     try {
       // 1. Create or get folder with chat name (encrypted)
       const encryptedChatName = this.encryptName(dto.chatName, userKey);
-      
+
       // Search for existing folder by decrypting all folder names
       const existingFolders = await this.prisma.folder.findMany({
         where: { userId, parentId: null },
       });
-      
-      let folder = existingFolders.find(f => 
+
+      let folder = existingFolders.find(f =>
         this.decryptName(f.name, userKey) === dto.chatName
       );
 
@@ -233,13 +236,13 @@ export class ImportService {
     try {
       // 1. Create or get folder with chat name (encrypted)
       const encryptedChatName = this.encryptName(dto.chatName, userKey);
-      
+
       // Search for existing folder by decrypting all folder names
       const existingFolders = await this.prisma.folder.findMany({
         where: { userId, parentId: null },
       });
-      
-      let folder = existingFolders.find(f => 
+
+      let folder = existingFolders.find(f =>
         this.decryptName(f.name, userKey) === dto.chatName
       );
 
@@ -254,12 +257,12 @@ export class ImportService {
 
       // 2. Get the entity for the source chat
       let targetEntity: any;
-      
+
       if (dto.chatType === 'saved' || dto.chatId === 'me') {
         targetEntity = new Api.InputPeerSelf();
       } else {
         const dialogs = await client.getDialogs({ limit: 100 });
-        
+
         let foundEntity: any = null;
         for (const dialog of dialogs) {
           const entity = (dialog as any).entity;
@@ -268,7 +271,7 @@ export class ImportService {
             break;
           }
         }
-        
+
         if (!foundEntity) {
           throw new Error(`Chat not found: ${dto.chatId}`);
         }

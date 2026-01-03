@@ -24,7 +24,7 @@ export class FoldersService {
   constructor(
     private prisma: PrismaService,
     private cryptoService: CryptoService,
-  ) {}
+  ) { }
 
   /**
    * Gets the encryption key for a user by deriving it from their session string.
@@ -32,7 +32,10 @@ export class FoldersService {
   private async getUserKey(userId: string): Promise<Buffer> {
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user) throw new NotFoundException('User not found');
-    return this.cryptoService.deriveKeyFromSession(user.sessionString);
+
+    // Decrypt the session string first to get a stable key source
+    const rawSessionString = this.cryptoService.decryptSession(user.sessionString);
+    return this.cryptoService.deriveKeyFromSession(rawSessionString);
   }
 
   private encryptName(name: string, userKey: Buffer): string {
@@ -70,7 +73,7 @@ export class FoldersService {
       include: { children: true, files: true },
     });
     if (!folder) throw new NotFoundException('Folder not found');
-    
+
     return {
       ...this.serializeFolder(folder, userKey),
       children: folder.children.map(c => this.serializeFolder(c, userKey)),
@@ -88,7 +91,7 @@ export class FoldersService {
     // Build the path from root to this folder
     const path: SerializedFolder[] = [];
     let currentFolder = folder;
-    
+
     while (currentFolder) {
       path.unshift(this.serializeFolder(currentFolder, userKey));
       if (currentFolder.parentId) {

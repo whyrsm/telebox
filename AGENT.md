@@ -182,6 +182,7 @@ Before suggesting a commit:
 - **File Size Limit:** 2GB per file (4GB with Telegram Premium)
 - **Non-Commercial:** This is a community project, not for commercial use
 - **Open Source:** Code should be readable and well-documented
+- **Script Execution:** Never execute scripts or commands without explicit user permission
 
 ## Helpful Context
 
