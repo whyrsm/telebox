@@ -1,5 +1,80 @@
 # Release Notes
 
+## [v0.2.1] - 2026-01-04
+
+### 🔐 Security Enhancements
+
+- **Session String Encryption**: Implemented AES-256-GCM encryption for user session strings
+  - Session strings are now encrypted at rest in the database
+  - Enhanced security against database breaches
+  - Migration script provided for existing data (`migrate-sessions-to-gcm.ts`)
+  
+- **Metadata Encryption Improvements**: Refined encryption mechanism for file and folder names
+  - Standardized encryption under `CryptoService`
+  - Dual-key decryption logic for backward compatibility
+  - Support for both canonical (new) and legacy encryption keys
+  - Comprehensive documentation of encryption architecture
+
+- **Security Page**: Added dedicated `/security` page explaining encryption mechanisms
+  - Transparent explanation of zero-knowledge architecture
+  - Visual breakdown of encryption process
+  - Technical deep dive into AES-256-GCM implementation
+  - User-friendly security information
+
+### 📊 Analytics & Monitoring
+
+- **Google Analytics Integration**: Added Google Analytics tracking
+  - Configurable via `VITE_GA_MEASUREMENT_ID` environment variable
+  - Privacy-conscious implementation
+  - Integrated in `index.html` with environment variable support
+
+### 🛠️ Developer Tools
+
+- **Database Migration Scripts**: Enhanced migration capabilities
+  - PostgreSQL database migration tools using `podman`
+  - Session encryption migration script
+  - Metadata encryption assessment tools
+  - Database comparison utilities for data verification
+
+- **Encryption Debugging Tools**: Added utilities for encryption troubleshooting
+  - Decrypt tool script for testing encrypted strings
+  - Session encryption assessment script
+  - Comprehensive encryption documentation
+
+### 📚 Documentation
+
+- **Encryption Mechanism Documentation**: Added detailed technical documentation
+  - `docs/20260104_encryption_mechanism.md` - Complete encryption architecture
+  - Visual diagrams of encryption flow
+  - Security benefits and trade-offs explained
+  - FAQ section for common questions
+
+- **Updated Metadata Encryption Docs**: Refined existing encryption documentation
+  - Clarified session string persistence
+  - Updated key derivation process
+  - Enhanced security explanations
+
+### 🐛 Bug Fixes
+
+- **Encryption Key Consistency**: Fixed issues with folder and file name display
+  - Resolved key derivation inconsistencies
+  - Ensured stable encryption keys across services
+  - Fixed decryption errors for existing data
+
+### 🔧 Technical Improvements
+
+- **CryptoService Standardization**: Centralized all encryption logic
+  - Unified encryption/decryption methods
+  - Consistent key derivation across services
+  - Better error handling and validation
+
+- **Service Refactoring**: Updated services to use standardized encryption
+  - `TelegramService` now uses `CryptoService`
+  - `AuthService` integrated with new encryption
+  - `FilesService` and `FoldersService` use dual-key decryption
+
+---
+
 ## [v0.2.0] - 2026-01-03
 
 ### 🎉 New Features
@@ -114,12 +189,47 @@ This is the first official release of **Telebox** - a self-hosted cloud storage 
 
 ## Version History
 
+- **v0.3.0** (2026-01-04) - Security enhancements and encryption improvements
 - **v0.2.0** (2026-01-03) - Move To functionality and modal improvements
 - **v0.1.0** (2025-12-29) - Initial release with core features
 
 ---
 
 ## Upgrade Notes
+
+### From v0.2.0 to v0.3.0
+
+**Important Security Update:**
+
+This release introduces session string encryption. Existing installations should migrate their data:
+
+1. **Session Encryption Migration** (Recommended):
+   ```bash
+   cd backend
+   # Review the migration script first
+   cat scripts/migrate-sessions-to-gcm.ts
+   # Run migration (if script exists)
+   npm run migrate:sessions
+   ```
+
+2. **Environment Variables**:
+   - **Optional**: Add `VITE_GA_MEASUREMENT_ID` to `frontend/.env` for Google Analytics
+   - Existing `ENCRYPTION_KEY` in `backend/.env` continues to work
+
+3. **Database Compatibility**:
+   - Fully backward compatible with existing encrypted metadata
+   - Dual-key decryption supports both old and new encryption formats
+   - No data loss during migration
+
+**New Features Available:**
+- Visit `/security` page to learn about the encryption architecture
+- Enhanced privacy with encrypted session strings
+- Improved encryption documentation in `/docs`
+
+**Breaking Changes:**
+- None. This release is fully backward compatible.
+
+---
 
 ### From v0.1.0 to v0.2.0
 
