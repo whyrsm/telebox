@@ -5,6 +5,7 @@ import { useAuthStore } from '@/stores/auth.store';
 import { LandingPage } from '@/pages/Landing';
 import { LoginPage } from '@/pages/Login';
 import { DrivePage } from '@/pages/Drive';
+import { PrivacyPolicyPage } from '@/pages/PrivacyPolicy';
 
 const queryClient = new QueryClient();
 
@@ -59,6 +60,7 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       />
+      <Route path="/privacy" element={<PrivacyPolicyPage />} />
     </Routes>
   );
 }
